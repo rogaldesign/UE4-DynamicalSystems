@@ -7,8 +7,6 @@ class UNetRigidBody;
 class UNetAvatar;
 class UNetVoice;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FSystemFloatMsgDecl, int32, System, int32, Id, float, Value);
-
 UCLASS( ClassGroup=(DynamicalSystems), meta=(BlueprintSpawnableComponent) )
 class DYNAMICALSYSTEMS_API ANetClient : public AActor
 {
@@ -36,12 +34,6 @@ public:
 	void RegisterAvatar(UNetAvatar* Avatar);
     void RegisterVoice(UNetVoice* Voice);
     void Say(uint8* Bytes, uint32 Count);
-
-	UFUNCTION(BlueprintCallable, Category="NetClient")
-    void SendSystemFloat(int32 System, int32 Id, float Value);
-
-	UPROPERTY(BlueprintAssignable)
-	FSystemFloatMsgDecl OnSystemFloatMsg;
     
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NetClient")
     FString Local;

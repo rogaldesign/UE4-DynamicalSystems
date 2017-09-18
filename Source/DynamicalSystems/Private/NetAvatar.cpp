@@ -20,7 +20,7 @@ void UNetAvatar::BeginPlay()
 	if (IsNetProxy) {
 		NetClient->RegisterAvatar(this);
 	}
-	else if (IsValid(NetClient)) {
+	else {
 		NetClient->Avatar = this;
 	}
 }
@@ -31,7 +31,7 @@ void UNetAvatar::TickComponent( float DeltaTime, ELevelTick TickType, FActorComp
 
 	float CurrentTime = UGameplayStatics::GetRealTimeSeconds(GetWorld());
 
-	if (!IsNetProxy && IsValid(NetClient)) {
+	if (!IsNetProxy) {
         NetID = 200 + NetClient->NetIndex;
 		LastUpdateTime = CurrentTime;
 	}
