@@ -4,7 +4,7 @@ extern crate uuid;
 #[macro_use]
 extern crate serde_derive;
 extern crate bincode;
-extern crate mumblebot;
+//extern crate mumblebot;
 
 use bincode::{serialize, deserialize, Infinite};
 
@@ -183,22 +183,12 @@ pub fn rd_netclient_open(local_addr: *const c_char, server_addr: *const c_char, 
         let mut core = Core::new().unwrap();
         let handle = core.handle();
 
-        let (mumble_loop, _tcp_tx, udp_tx) = mumblebot::run(local_addr, mumble_addr, vox_inp_tx.clone(), &handle);
+        //let (mumble_loop, _tcp_tx, udp_tx) = mumblebot::run(local_addr, mumble_addr, vox_inp_tx.clone(), &handle);
 
-        let mumble_say = mumblebot::say(vox_out_rx, udp_tx.clone());
+        //let mumble_say = mumblebot::say(vox_out_rx, udp_tx.clone());
 
-        mumblebot::gst::sink_main(vox_out_tx.clone());
-        let mumble_listen = mumblebot::gst::src_main(vox_inp_rx);
-
-        // let mumble_listen = vox_inp_rx.fold(vox_queue, |queue, pcm| {
-        //     {
-        //         let mut locked_queue = queue.lock().unwrap();
-        //         locked_queue.push_back(pcm);
-        //     }
-        //     ok::<SharedQueue<Vec<u8>>, std::io::Error>(queue)
-        //     .map_err(|_| ())
-        // })
-        // .map_err(|_| std::io::Error::new(std::io::ErrorKind::Other, "vox_inp_task"));
+        //mumblebot::gst::sink_main(vox_out_tx.clone());
+        //let mumble_listen = mumblebot::gst::src_main(vox_inp_rx);
         
         let udp_socket = UdpSocket::bind(&local_addr, &handle).unwrap();
         let (tx, rx) = udp_socket.framed(LineCodec).split();
@@ -226,9 +216,9 @@ pub fn rd_netclient_open(local_addr: *const c_char, server_addr: *const c_char, 
         .map_err(|_| std::io::Error::new(std::io::ErrorKind::Other, "kill_switch"));
 
         let msg_tasks = Future::join(msg_inp_task, msg_out_task);
-        let mum_tasks = Future::join(mumble_say, mumble_listen);
+        //let mum_tasks = Future::join(mumble_say, mumble_listen);
 
-        if let Err(err) = core.run(Future::join4(mum_tasks, msg_tasks, mumble_loop, kill_switch)) {
+        if let Err(err) = core.run(Future::join(msg_tasks, kill_switch)) {
         //if let Err(err) = core.run(msg_tasks) {
             log(format!("rd_netclient_open: {}", err));
         }

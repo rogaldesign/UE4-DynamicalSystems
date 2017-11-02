@@ -10,8 +10,8 @@ class UNetVoice;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FSystemFloatMsgDecl, int32, System, int32, Id, float, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FSystemIntMsgDecl, int32, System, int32, Id, int32, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FSystemStringMsgDecl, int32, System, int32, Id, FString, Value);
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FVoiceActivityMsgDecl, int32, NetId, float, Value);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FUint8MsgDecl, uint8, System, uint8, Id);
 
 DECLARE_LOG_CATEGORY_EXTERN(RustyNet, Log, All);
 
@@ -63,6 +63,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FVoiceActivityMsgDecl OnVoiceActivityMsg;
+
+	UPROPERTY(BlueprintAssignable)
+	FUint8MsgDecl OnUint8Msg;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NetClient")
     FString Local;

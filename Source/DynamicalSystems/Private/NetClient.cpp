@@ -210,8 +210,8 @@ void ANetClient::Tick(float DeltaTime)
     if (RustMsg->vec_len > 0) {
 
         if (Msg[0] == 0) { // Ping
-            Uuid = *((int32*)(Msg + 1));
-            NetClients.Add(Uuid, CurrentTime + 5);
+            int32 RemoteUuid = *((int32*)(Msg + 1));
+            NetClients.Add(RemoteUuid, CurrentTime + 5);
             RebuildConsensus();
         }
         else if (Msg[0] == 1) { // World
@@ -279,6 +279,7 @@ void ANetClient::Tick(float DeltaTime)
 		}
 	}
 	rd_netclient_msg_drop(RustMsg);
+
     
     //RustVec* RustVox = rd_netclient_vox_pop(Client);
     //uint8* Vox = (uint8*)RustVox->vec_ptr;
