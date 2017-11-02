@@ -106,4 +106,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NetClient|Debug")
 	bool MirrorSyncY = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NetClient|Debug")
+	bool IsDebugRemoteClient;
 };

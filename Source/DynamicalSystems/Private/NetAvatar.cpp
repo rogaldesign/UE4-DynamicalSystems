@@ -11,8 +11,11 @@ void UNetAvatar::BeginPlay()
 	Super::BeginPlay();
 
 	for (TActorIterator<ANetClient> ActorItr(GetWorld()); ActorItr; ++ActorItr) {
-		NetClient = *ActorItr;
-		break;
+		if (!ActorItr->IsDebugRemoteClient)
+		{
+			NetClient = *ActorItr;
+			break;
+		}
 	}
 
 	LastUpdateTime = UGameplayStatics::GetRealTimeSeconds(GetWorld());
