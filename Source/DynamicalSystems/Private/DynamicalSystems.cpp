@@ -69,7 +69,7 @@ void FDynamicalSystemsModule::StartupModule()
 
 	TArray<FString> Paths;
 	Paths.Add(FPaths::Combine(*VeniceBaseDir, TEXT("gstreamer/1.0/x86_64/bin")));
-	Paths.Add(FPaths::Combine(*VeniceBaseDir, TEXT("Binaries/ThirdParty/tensorflow")));
+	//Paths.Add(FPaths::Combine(*VeniceBaseDir, TEXT("Binaries/ThirdParty/tensorflow")));
 	Paths.Add(FString(OldPath));
 	FString Path = FString::Join(Paths, TEXT(";"));
 	FGenericPlatformMisc::SetEnvironmentVar(L"PATH", *Path);
