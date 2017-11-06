@@ -58,7 +58,7 @@ impl UdpCodec for LineCodec {
 type SharedQueue<T> = std::sync::Arc<std::sync::Mutex<std::collections::VecDeque<T>>>;
 
 pub struct Client {
-    sender_pubsub: futures::sink::Wait<futures::sync::mpsc::UnboundedSender<Vec<u8>>>,
+    sender_pubsub: futures::sink::Wait<futures::sync::mpsc::Sender<Vec<u8>>>,
     vox: futures::sink::Wait<futures::sync::mpsc::Sender<Vec<u8>>>,
     task: Option<std::thread::JoinHandle<()>>,
     msg_queue: SharedQueue<Vec<u8>>,
@@ -160,7 +160,7 @@ pub fn netclient_open(local_addr: String, server_addr: String, mumble_addr: Stri
 
     let (kill_tx, kill_rx) = futures::sync::mpsc::channel::<()>(0);
 
-    let (ffi_tx, ffi_rx) = futures::sync::mpsc::unbounded::<Vec<u8>>();
+    let (ffi_tx, ffi_rx) = futures::sync::mpsc::channel::<Vec<u8>>(1000);
 
     let (vox_out_tx, vox_out_rx) = futures::sync::mpsc::channel::<Vec<u8>>(1000);
     let (vox_inp_tx, vox_inp_rx) = futures::sync::mpsc::channel::<Vec<u8>>(1000);
@@ -237,7 +237,7 @@ pub fn netclient_open(local_addr: String, server_addr: String, mumble_addr: Stri
 #[repr(C)]
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct RigidBody {
-    id: u8,
+    id: u16,
     px: f32,
     py: f32,
     pz: f32,
@@ -251,7 +251,7 @@ pub struct RigidBody {
 #[repr(C)]
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct Avatar {
-    id: u8,
+    id: u16,
     px: f32,
     py: f32,
     pz: f32,

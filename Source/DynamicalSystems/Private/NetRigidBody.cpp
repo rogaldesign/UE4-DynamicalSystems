@@ -37,7 +37,7 @@ void UNetRigidBody::TickComponent( float DeltaTime, ELevelTick TickType, FActorC
 
 	AActor* Actor = GetOwner();
 	URigidBodyController* PIDController = Actor->FindComponentByClass<URigidBodyController>();
-	if (PIDController && NetOwner != NetClient->NetIndex) {
+	if (PIDController && NetOwner != NetClient->NetIndex && NetClient->NetIndex >= 0) {
 		PIDController->Enabled = true;
 		PIDController->TargetLocation = TargetLocation + TargetLinearVelocity * DeltaTime;
 		//PIDController->TargetRotation = TargetRotation;

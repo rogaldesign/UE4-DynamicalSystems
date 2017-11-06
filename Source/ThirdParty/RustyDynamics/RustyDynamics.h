@@ -20,13 +20,13 @@ extern "C" {
     } RustVec;
 
     typedef struct AvatarPack {
-        uint8_t id;
+        uint16_t id;
         float px, py, pz, pw;
         float rx, ry, rz, rw;
     } AvatarPack;
 
     typedef struct RigidBodyPack {
-        uint8_t id;
+        uint16_t id;
         float px, py, pz, pw;
         float lx, ly, lz, lw;
         // float rx, ry, rz;

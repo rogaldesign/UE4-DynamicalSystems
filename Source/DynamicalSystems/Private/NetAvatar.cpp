@@ -26,6 +26,7 @@ void UNetAvatar::BeginPlay()
 	}
 	else if (IsValid(NetClient)) {
 		NetClient->Avatar = this;
+		NetID = NetClient->Uuid;
 	}
 }
 
@@ -36,12 +37,10 @@ void UNetAvatar::TickComponent( float DeltaTime, ELevelTick TickType, FActorComp
 	float CurrentTime = UGameplayStatics::GetRealTimeSeconds(GetWorld());
 
 	if (!IsNetProxy && IsValid(NetClient)) {
-        NetID = 200 + NetClient->NetIndex;
 		LastUpdateTime = CurrentTime;
 	}
 
-	if (CurrentTime > LastUpdateTime + 1) {
-		
+	if ((CurrentTime - LastUpdateTime) > 20) {
 		AController* Controller = Cast<AController>(GetOwner());
 		if (IsValid(Controller)) {
 			APawn* Pawn = Controller->GetPawn();
