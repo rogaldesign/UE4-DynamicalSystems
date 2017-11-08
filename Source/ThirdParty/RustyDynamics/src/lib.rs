@@ -163,7 +163,7 @@ pub fn netclient_open(local_addr: String, server_addr: String, mumble_addr: Stri
     let (ffi_tx, ffi_rx) = futures::sync::mpsc::channel::<Vec<u8>>(1000);
 
     let (vox_out_tx, vox_out_rx) = futures::sync::mpsc::channel::<Vec<u8>>(1000);
-    let (vox_inp_tx, vox_inp_rx) = futures::sync::mpsc::channel::<Vec<u8>>(1000);
+    let (vox_inp_tx, vox_inp_rx) = futures::sync::mpsc::channel::<(i32, Vec<u8>)>(1000);
 
     let msg_queue: VecDeque<Vec<u8>> = VecDeque::new();
     let msg_queue = Arc::new(Mutex::new(msg_queue));
