@@ -35,7 +35,6 @@ void ANetClient::RegisterVoice(UNetVoice* Voice)
 
 void ANetClient::Say(uint8* Bytes, uint32 Count)
 {
-    //rd_netclient_vox_push(Client, Bytes, Count);
 }
 
 void ANetClient::RebuildConsensus()
@@ -59,7 +58,7 @@ void ANetClient::RebuildConsensus()
 void ANetClient::BeginPlay()
 {
     Super::BeginPlay();
-    
+	Uuid = FMath::RandRange(10000, 99999);
     bool bCanBindAll;
     TSharedPtr<class FInternetAddr> localIp = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->GetLocalHostAddr(*GLog, bCanBindAll);
     Local = localIp->ToString(true);
@@ -140,14 +139,6 @@ void ANetClient::Tick(float DeltaTime)
         rd_netclient_msg_push(Client, Msg, 3);
         LastPingTime = CurrentTime;
     }
-
-	//for (int Idx=0; Idx<NetVoices.Num(); ++Idx) {
-	//	UNetVoice* NetVoice = NetVoices[Idx];
-	//	if (NetVoice->Activity > 0) {
-	//		//UE_LOG(RustyNet, Warning, TEXT("NetVoice Activity: %u"), Activity);
-	//		OnVoiceActivityMsg.Broadcast(NetVoice->NetClient->NetIndex, (float)NetVoice->Activity/16384.f);
-	//	}
-	//}
     
     if (CurrentBodyTime > LastBodyTime + 0.1) {
 
@@ -289,18 +280,6 @@ void ANetClient::Tick(float DeltaTime)
 			break;
 		}
 	}
-
-    
-    //RustVec* RustVox = rd_netclient_vox_pop(Client);
-    //uint8* Vox = (uint8*)RustVox->vec_ptr;
-    //if (RustVox->vec_len > 0) {
-    //    UE_LOG(RustyNet, Warning, TEXT("VOX incoming %i"), RustVox->vec_len);
-    //    for (int Idx=0; Idx<NetVoices.Num(); ++Idx) {
-    //        UNetVoice* Voice = NetVoices[Idx];
-    //        Voice->Say(Vox, RustVox->vec_len);
-    //    }
-    //}
-    //rd_netclient_vox_drop(RustVox);
 }
 
 void ANetClient::SendSystemFloat(int32 System, int32 Id, float Value)
