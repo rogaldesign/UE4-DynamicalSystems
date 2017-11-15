@@ -59,10 +59,7 @@ type SharedQueue<T> = std::sync::Arc<std::sync::Mutex<std::collections::VecDeque
 
 pub struct Client {
     sender_pubsub: futures::sink::Wait<futures::sync::mpsc::Sender<Vec<u8>>>,
-    vox: futures::sink::Wait<futures::sync::mpsc::Sender<Vec<u8>>>,
-    task: Option<std::thread::JoinHandle<()>>,
     msg_queue: SharedQueue<Vec<u8>>,
-    vox_queue: SharedQueue<Vec<u8>>,
     kill: futures::sink::Wait<futures::sync::mpsc::Sender<()>>,
 }
 
@@ -113,38 +110,6 @@ pub fn rd_netclient_drop(client: *mut Client) {
 }
 
 #[no_mangle]
-pub fn rd_netclient_vox_push(client: *mut Client, bytes: *const u8, count: u32) {
-    unsafe {
-        let vox = std::slice::from_raw_parts(bytes, count as usize);
-        let vox = Vec::from(vox);
-        if let Err(err) = (*client).vox.send(vox) {
-            log(format!("rd_netclient_vox_push: {}", err));
-        }
-    }
-}
-
-#[no_mangle]
-pub fn rd_netclient_vox_pop(client: *mut Client) -> *mut Vec<u8> {
-    unsafe {
-        let mut data : Vec<u8> = Vec::new();
-        {
-            if let Ok(mut locked_queue) = (*client).vox_queue.try_lock() {
-                if let Some(m) = locked_queue.pop_front() {
-                    data = m;
-                }
-            }
-        }
-        let data = Box::new(data);
-        Box::into_raw(data)
-    }
-}
-
-#[no_mangle]
-pub fn rd_netclient_vox_drop(vox: *mut Vec<u8>) {
-    unsafe { Box::from_raw(vox) };
-}
-
-#[no_mangle]
 pub fn rd_netclient_open(local_addr: *const c_char, server_addr: *const c_char, mumble_addr: *const c_char) -> *mut Client {
     let local_addr = unsafe { std::ffi::CStr::from_ptr(local_addr).to_owned().into_string().unwrap() };
     let server_addr = unsafe { std::ffi::CStr::from_ptr(server_addr).to_owned().into_string().unwrap() };
@@ -168,19 +133,13 @@ pub fn netclient_open(local_addr: String, server_addr: String, mumble_addr: Stri
     let msg_queue: VecDeque<Vec<u8>> = VecDeque::new();
     let msg_queue = Arc::new(Mutex::new(msg_queue));
 
-    let vox_queue: VecDeque<Vec<u8>> = VecDeque::new();
-    let vox_queue = Arc::new(Mutex::new(vox_queue));
-
-    let mut client = Box::new(Client{
+    let client = Box::new(Client{
         sender_pubsub: ffi_tx.wait(),
-        vox: vox_out_tx.clone().wait(),
-        task: None,
         msg_queue: Arc::clone(&msg_queue),
-        vox_queue: Arc::clone(&vox_queue),
         kill: kill_tx.wait(),
     });
 
-    let task = thread::spawn(move || {
+    thread::spawn(move || {
 
         let mut core = Core::new().unwrap();
         let handle = core.handle();
@@ -230,8 +189,6 @@ pub fn netclient_open(local_addr: String, server_addr: String, mumble_addr: Stri
         log(format!("core end"));
 
     });
-
-    client.task = Some(task);
 
     Box::into_raw(client)
 }
