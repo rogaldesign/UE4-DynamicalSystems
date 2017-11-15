@@ -189,8 +189,8 @@ pub fn netclient_open(local_addr: String, server_addr: String, mumble_addr: Stri
 
         let mumble_say = mumblebot::say(vox_out_rx, udp_tx.clone());
 
-        mumblebot::gst::sink_main(vox_out_tx.clone());
-        let mumble_listen = mumblebot::gst::src_main(vox_inp_rx);
+        let kill_sink = mumblebot::gst::sink_main(vox_out_tx.clone());
+        let (kill_src, mumble_listen) = mumblebot::gst::src_main(vox_inp_rx);
         
         let udp_socket = UdpSocket::bind(&local_addr, &handle).unwrap();
         let (tx, rx) = udp_socket.framed(LineCodec).split();
@@ -212,7 +212,9 @@ pub fn netclient_open(local_addr: String, server_addr: String, mumble_addr: Stri
 
         let kill_switch = kill_rx
         .fold((), |_a, _b| {
-            // log(format!("kill_switch"));
+            log(format!("kill_switch"));
+            kill_sink();
+            kill_src();
             err::<(),()>(())
         })
         .map_err(|_| std::io::Error::new(std::io::ErrorKind::Other, "kill_switch"));
