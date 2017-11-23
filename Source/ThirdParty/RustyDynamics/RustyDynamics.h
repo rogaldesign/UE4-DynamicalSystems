@@ -21,8 +21,15 @@ extern "C" {
 
     typedef struct AvatarPack {
         uint16_t id;
-        float px, py, pz, pw;
-        float rx, ry, rz, rw;
+        float root_px, root_py, root_pz, root_pw;
+        float root_rx, root_ry, root_rz, root_rw;
+        float head_px, head_py, head_pz, head_pw;
+        float head_rx, head_ry, head_rz, head_rw;
+        float handL_px, handL_py, handL_pz, handL_pw;
+        float handL_rx, handL_ry, handL_rz, handL_rw;
+        float handR_px, handR_py, handR_pz, handR_pw;
+        float handR_rx, handR_ry, handR_rz, handR_rw;
+        float height, floor;
     } AvatarPack;
 
     typedef struct RigidBodyPack {
@@ -58,6 +65,4 @@ extern "C" {
     AvatarPack* rd_netclient_dec_avatar(const uint8* bytes, uint32_t count);
     void rd_netclient_drop_avatar(AvatarPack* avatar);
 
-    void rd_netclient_test_world(const TestWorld* world);
-    void rd_netclient_real_world(const WorldPack* world);
 }

@@ -211,14 +211,15 @@ pub struct RigidBody {
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct Avatar {
     id: u16,
-    px: f32,
-    py: f32,
-    pz: f32,
-    pw: f32,
-    rx: f32,
-    ry: f32,
-    rz: f32,
-    rw: f32,
+    root_px: f32, root_py: f32, root_pz: f32, root_pw: f32,
+    root_rx: f32, root_ry: f32, root_rz: f32, root_rw: f32,
+    head_px: f32, head_py: f32, head_pz: f32, head_pw: f32,
+    head_rx: f32, head_ry: f32, head_rz: f32, head_rw: f32,
+    handL_px: f32, handL_py: f32, handL_pz: f32, handL_pw: f32,
+    handL_rx: f32, handL_ry: f32, handL_rz: f32, handL_rw: f32,
+    handR_px: f32, handR_py: f32, handR_pz: f32, handR_pw: f32,
+    handR_rx: f32, handR_ry: f32, handR_rz: f32, handR_rw: f32,
+    height: f32, floor: f32,
 }
 
 #[repr(C)]
@@ -256,7 +257,7 @@ pub fn rd_netclient_drop_world(world: *mut World) {
 #[no_mangle]
 pub fn rd_netclient_push_avatar(client: *mut Client, avatar: *const Avatar) {
     unsafe {
-        let mut msg = vec![1u8];
+        let mut msg = vec![2u8];
         let mut encoded: Vec<u8> = serialize(&(*avatar), Infinite).unwrap();
         msg.append(&mut encoded);
         (*client).sender_pubsub.send(msg);
@@ -286,56 +287,6 @@ pub struct TestEntity {
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct TestWorld(Vec<TestEntity>);
-
-#[no_mangle]
-pub fn rd_netclient_test_world(world: *const TestWorld) {
-    unsafe {
-        let world_cmp = TestWorld(vec![TestEntity { x: 0.0, y: 4.0 }, TestEntity { x: 10.0, y: 20.5 }]);
-
-        assert_eq!(world_cmp, *world, "raw ffi");
-        println!("raw world: {:?}", *world);
-
-        let encoded: Vec<u8> = serialize(&(*world), Infinite).unwrap();
-        assert_eq!(encoded.len(), 8 + 4 * 4, "compact length");
-
-        let decoded: TestWorld = deserialize(&encoded[..]).unwrap();
-        assert_eq!(world_cmp, decoded, "decoding world");
-        println!("decoded world: {:?}", decoded);
-    }
-}
-
-#[no_mangle]
-pub fn rd_netclient_real_world(world: *const World) {
-    unsafe {
-        let world_cmp = World {
-            avatar_parts: vec![
-                Avatar{id: 20, px: 1.0, py: 1.1, pz: 1.2, pw: 1.3, rx: 2.0, ry: 2.1, rz: 2.2, rw: 2.3},
-                Avatar{id: 21, px: 1.0, py: 1.1, pz: 1.2, pw: 1.3, rx: 2.0, ry: 2.1, rz: 2.2, rw: 2.3},
-                Avatar{id: 22, px: 1.0, py: 1.1, pz: 1.2, pw: 1.3, rx: 2.0, ry: 2.1, rz: 2.2, rw: 2.3},
-                Avatar{id: 23, px: 1.0, py: 1.1, pz: 1.2, pw: 1.3, rx: 2.0, ry: 2.1, rz: 2.2, rw: 2.3},
-                Avatar{id: 24, px: 1.0, py: 1.1, pz: 1.2, pw: 1.3, rx: 2.0, ry: 2.1, rz: 2.2, rw: 2.3},
-                ],
-            rigid_bodies: vec![
-                RigidBody{id: 10, px: 1.0, py: 1.1, pz: 1.2, pw: 1.3, lx: 2.0, ly: 2.1, lz: 2.2, lw: 2.3},
-                RigidBody{id: 11, px: 1.0, py: 1.1, pz: 1.2, pw: 1.3, lx: 2.0, ly: 2.1, lz: 2.2, lw: 2.3},
-                RigidBody{id: 12, px: 1.0, py: 1.1, pz: 1.2, pw: 1.3, lx: 2.0, ly: 2.1, lz: 2.2, lw: 2.3},
-                ],
-        };
-
-        println!("mem::size_of::<Avatar> {}", std::mem::size_of::<Avatar>());
-        println!("mem::size_of::<RigidBody> {}", std::mem::size_of::<RigidBody>());
-        println!("mem::size_of::<Vec<Avatar>> {}", std::mem::size_of::<Vec<Avatar>>());
-        println!("mem::size_of::<Vec<RigidBody>> {}", std::mem::size_of::<Vec<RigidBody>>());
-        println!("mem::size_of::<World> {}", std::mem::size_of::<World>());
-        println!("mem::size_of::<usize> {}", std::mem::size_of::<usize>());
-
-        assert_eq!(world_cmp, *world, "struct layout match");
-
-        let encoded: Vec<u8> = serialize(&(*world), Infinite).unwrap();
-        let decoded: World = deserialize(&encoded[..]).unwrap();
-        assert_eq!(world_cmp, decoded, "encoding decoding match");
-    }
-}
 
 #[cfg(test)]
 mod tests {
