@@ -54,6 +54,10 @@ extern "C" {
     WorldPack* rd_netclient_dec_world(const uint8* bytes, uint32_t count);
     void rd_netclient_drop_world(WorldPack* world);
 
+    void rd_netclient_push_avatar(void* client, const AvatarPack* avatar);
+    AvatarPack* rd_netclient_dec_avatar(const uint8* bytes, uint32_t count);
+    void rd_netclient_drop_avatar(AvatarPack* avatar);
+
     void rd_netclient_test_world(const TestWorld* world);
     void rd_netclient_real_world(const WorldPack* world);
 }

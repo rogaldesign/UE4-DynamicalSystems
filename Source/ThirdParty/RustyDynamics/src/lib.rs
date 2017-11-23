@@ -230,7 +230,6 @@ pub struct World {
 
 #[no_mangle]
 pub fn rd_netclient_push_world(client: *mut Client, world: *const World) {
-    
     unsafe {
         let mut msg = vec![1u8];
         let mut encoded: Vec<u8> = serialize(&(*world), Infinite).unwrap();
@@ -252,6 +251,31 @@ pub fn rd_netclient_dec_world(bytes: *const u8, count: u32) -> *const World {
 #[no_mangle]
 pub fn rd_netclient_drop_world(world: *mut World) {
     unsafe { Box::from_raw(world) };
+}
+
+#[no_mangle]
+pub fn rd_netclient_push_avatar(client: *mut Client, avatar: *const Avatar) {
+    unsafe {
+        let mut msg = vec![1u8];
+        let mut encoded: Vec<u8> = serialize(&(*avatar), Infinite).unwrap();
+        msg.append(&mut encoded);
+        (*client).sender_pubsub.send(msg);
+    }
+}
+
+#[no_mangle]
+pub fn rd_netclient_dec_avatar(bytes: *const u8, count: u32) -> *const Avatar {
+    unsafe {
+        let msg = std::slice::from_raw_parts(bytes, count as usize);
+        let avatar: Avatar = deserialize(msg).unwrap();
+        let avatar = Box::new(avatar);
+        Box::into_raw(avatar)
+    }
+}
+
+#[no_mangle]
+pub fn rd_netclient_drop_avatar(avatar: *mut Avatar) {
+    unsafe { Box::from_raw(avatar) };
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
