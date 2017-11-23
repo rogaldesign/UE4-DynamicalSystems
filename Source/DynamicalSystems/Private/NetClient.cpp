@@ -148,11 +148,11 @@ void ANetClient::Tick(float DeltaTime)
 			FQuat Rotation;
 
 			Pack.root_px = Avatar->Location.X; Pack.root_py = Avatar->Location.Y; Pack.root_pz = Avatar->Location.Z;
-			Rotation = Avatar->RotationHMD.Quaternion();
+			Rotation = Avatar->Rotation.Quaternion();
 			Pack.root_rx = Rotation.X; Pack.root_ry = Rotation.Y; Pack.root_rz = Rotation.Z; Pack.root_rw = Rotation.W;
 
 			Pack.head_px = Avatar->LocationHMD.X; Pack.head_py = Avatar->LocationHMD.Y; Pack.head_pz = Avatar->LocationHMD.Z;
-			Rotation = Avatar->Rotation.Quaternion();
+			Rotation = Avatar->RotationHMD.Quaternion();
 			Pack.head_rx = Rotation.X; Pack.head_ry = Rotation.Y; Pack.head_rz = Rotation.Z; Pack.head_rw = Rotation.W;
 
 			Pack.handL_px = Avatar->LocationHandL.X; Pack.handL_py = Avatar->LocationHandL.Y; Pack.handL_pz = Avatar->LocationHandL.Z;
