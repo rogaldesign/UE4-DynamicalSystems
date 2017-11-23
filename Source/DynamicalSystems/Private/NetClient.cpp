@@ -142,55 +142,83 @@ void ANetClient::Tick(float DeltaTime)
     
     if (CurrentBodyTime > LastBodyTime + 0.1) {
 
-		WorldPack WorldPack;
-		memset(&WorldPack, 0, sizeof(WorldPack));
-
-        TArray<RigidBodyPack> BodyPacks;
-        for (int Idx=0; Idx<NetRigidBodies.Num(); ++Idx) {
-            UNetRigidBody* Body = NetRigidBodies[Idx];
-            if (IsValid(Body) && Body->NetOwner == NetIndex) {
-                AActor* Actor = Body->GetOwner();
-                if (IsValid(Actor)) {
-                    FVector LinearVelocity;
-                    FVector Location = Actor->GetActorLocation();
-                    UStaticMeshComponent* StaticMesh = Actor->FindComponentByClass<UStaticMeshComponent>();
-                    if (StaticMesh) {
-                        LinearVelocity = StaticMesh->GetBodyInstance()->GetUnrealWorldVelocity();
-                        RigidBodyPack Pack = {Body->NetID,
-                            Location.X, Location.Y, Location.Z, 1,
-                            LinearVelocity.X, LinearVelocity.Y, LinearVelocity.Z, 0,
-                        };
-                        BodyPacks.Add(Pack);
-                    }
-                }
-            }
-        }
-        
-        RustVec WorldRigidBodies;
-        WorldRigidBodies.vec_ptr = BodyPacks.Num() > 0 ? (uint64_t)&BodyPacks[0] : 0;
-        WorldRigidBodies.vec_cap = BodyPacks.Num();
-        WorldRigidBodies.vec_len = BodyPacks.Num();
-        WorldPack.rigidbodies = WorldRigidBodies;
-
-		TArray<AvatarPack> AvatarPacks;
 		if (IsValid(Avatar) && !Avatar->IsNetProxy) {
-			FVector Locations[] = { Avatar->Location, Avatar->LocationHMD, Avatar->LocationHandL, Avatar->LocationHandR };
-			FQuat Rotations[] = { Avatar->Rotation.Quaternion(), Avatar->RotationHMD.Quaternion(), Avatar->RotationHandL.Quaternion(), Avatar->RotationHandR.Quaternion() };
-			for (auto I = 0; I < 4; ++I) {
-				AvatarPack Pack = { Avatar->NetID,
-					Locations[I].X, Locations[I].Y, Locations[I].Z, 1,
-					Rotations[I].X, Rotations[I].Y, Rotations[I].Z, Rotations[I].W,
-				};
-				AvatarPacks.Add(Pack);
-			}
-			RustVec AvatarParts;
-			AvatarParts.vec_ptr = (uint64_t)&AvatarPacks[0];
-			AvatarParts.vec_cap = 4;
-			AvatarParts.vec_len = 4;
-			WorldPack.avatarparts = AvatarParts;
+			AvatarPack Pack;
+			memset(&Pack, 0, sizeof(AvatarPack));
+			FQuat Rotation;
+
+			Pack.root_px = Avatar->Location.X; Pack.root_py = Avatar->Location.Y; Pack.root_pz = Avatar->Location.Z;
+			Rotation = Avatar->RotationHMD.Quaternion();
+			Pack.root_rx = Rotation.X; Pack.root_ry = Rotation.Y; Pack.root_rz = Rotation.Z; Pack.root_rw = Rotation.W;
+
+			Pack.head_px = Avatar->LocationHMD.X; Pack.head_py = Avatar->LocationHMD.Y; Pack.head_pz = Avatar->LocationHMD.Z;
+			Rotation = Avatar->Rotation.Quaternion();
+			Pack.head_rx = Rotation.X; Pack.head_ry = Rotation.Y; Pack.head_rz = Rotation.Z; Pack.head_rw = Rotation.W;
+
+			Pack.handL_px = Avatar->LocationHandL.X; Pack.handL_py = Avatar->LocationHandL.Y; Pack.handL_pz = Avatar->LocationHandL.Z;
+			Rotation = Avatar->RotationHandL.Quaternion();
+			Pack.handL_rx = Rotation.X; Pack.handL_ry = Rotation.Y; Pack.handL_rz = Rotation.Z; Pack.handL_rw = Rotation.W;
+
+			Pack.handR_px = Avatar->LocationHandR.X; Pack.handR_py = Avatar->LocationHandR.Y; Pack.handR_pz = Avatar->LocationHandR.Z;
+			Rotation = Avatar->RotationHandR.Quaternion();
+			Pack.handR_rx = Rotation.X; Pack.handR_ry = Rotation.Y; Pack.handR_rz = Rotation.Z; Pack.handR_rw = Rotation.W;
+
+			Pack.height = Avatar->Height;
+			Pack.floor = Avatar->Floor;
+
+			rd_netclient_push_avatar(Client, &Pack);
 		}
 
-        rd_netclient_push_world(Client, &WorldPack);
+		// WorldPack WorldPack;
+		// memset(&WorldPack, 0, sizeof(WorldPack));
+
+        // TArray<RigidBodyPack> BodyPacks;
+        // for (int Idx=0; Idx<NetRigidBodies.Num(); ++Idx) {
+        //     UNetRigidBody* Body = NetRigidBodies[Idx];
+        //     if (IsValid(Body) && Body->NetOwner == NetIndex) {
+        //         AActor* Actor = Body->GetOwner();
+        //         if (IsValid(Actor)) {
+        //             FVector LinearVelocity;
+        //             FVector Location = Actor->GetActorLocation();
+        //             UStaticMeshComponent* StaticMesh = Actor->FindComponentByClass<UStaticMeshComponent>();
+        //             if (StaticMesh) {
+        //                 LinearVelocity = StaticMesh->GetBodyInstance()->GetUnrealWorldVelocity();
+        //                 RigidBodyPack Pack = {Body->NetID,
+        //                     Location.X, Location.Y, Location.Z, 1,
+        //                     LinearVelocity.X, LinearVelocity.Y, LinearVelocity.Z, 0,
+        //                 };
+        //                 BodyPacks.Add(Pack);
+        //             }
+        //         }
+        //     }
+        // }
+        
+        // RustVec WorldRigidBodies;
+        // WorldRigidBodies.vec_ptr = BodyPacks.Num() > 0 ? (uint64_t)&BodyPacks[0] : 0;
+        // WorldRigidBodies.vec_cap = BodyPacks.Num();
+        // WorldRigidBodies.vec_len = BodyPacks.Num();
+        // WorldPack.rigidbodies = WorldRigidBodies;
+
+		// TArray<AvatarPack> AvatarPacks;
+		// if (IsValid(Avatar) && !Avatar->IsNetProxy) {
+		// 	FVector Locations[] = { Avatar->Location, Avatar->LocationHMD, Avatar->LocationHandL, Avatar->LocationHandR };
+		// 	FQuat Rotations[] = { Avatar->Rotation.Quaternion(), Avatar->RotationHMD.Quaternion(), Avatar->RotationHandL.Quaternion(), Avatar->RotationHandR.Quaternion() };
+		// 	for (auto I = 0; I < 4; ++I) {
+		// 		AvatarPack Pack = { Avatar->NetID,
+		// 			Locations[I].X, Locations[I].Y, Locations[I].Z, 1,
+		// 			Rotations[I].X, Rotations[I].Y, Rotations[I].Z, Rotations[I].W,
+		// 		};
+		// 		AvatarPacks.Add(Pack);
+		// 	}
+		// 	RustVec AvatarParts;
+		// 	AvatarParts.vec_ptr = (uint64_t)&AvatarPacks[0];
+		// 	AvatarParts.vec_cap = 4;
+		// 	AvatarParts.vec_len = 4;
+		// 	WorldPack.avatarparts = AvatarParts;
+		// }
+
+        // rd_netclient_push_world(Client, &WorldPack);
+
         LastBodyTime = CurrentBodyTime;
     }
     
@@ -210,46 +238,71 @@ void ANetClient::Tick(float DeltaTime)
 				RebuildConsensus();
 			}
 			else if (Msg[0] == 1) { // World
-				WorldPack* WorldPack = rd_netclient_dec_world(&Msg[1], RustMsg->vec_len - 1);
-				uint64_t NumOfBodies = WorldPack->rigidbodies.vec_len;
-				RigidBodyPack* Bodies = (RigidBodyPack*)WorldPack->rigidbodies.vec_ptr;
-				for (auto Idx=0; Idx<NumOfBodies; ++Idx) {
-					FVector Location(Bodies[Idx].px, (MirrorSyncY ? -1 : 1) * Bodies[Idx].py, Bodies[Idx].pz);
-					FVector LinearVelocity(Bodies[Idx].lx, (MirrorSyncY ? -1 : 1) * Bodies[Idx].ly, Bodies[Idx].lz);
-					uint16 NetID = Bodies[Idx].id;
-					UNetRigidBody** NetRigidBody = NetRigidBodies.FindByPredicate([NetID](const UNetRigidBody* Item) {
-						return IsValid(Item) && Item->NetID == NetID;
-					});
-					if (NetRigidBody != NULL && *NetRigidBody != NULL) {
-						(*NetRigidBody)->SyncTarget = true;
-						(*NetRigidBody)->TargetLocation = Location;
-						(*NetRigidBody)->TargetLinearVelocity = LinearVelocity;
-					}
+				// WorldPack* WorldPack = rd_netclient_dec_world(&Msg[1], RustMsg->vec_len - 1);
+				// uint64_t NumOfBodies = WorldPack->rigidbodies.vec_len;
+				// RigidBodyPack* Bodies = (RigidBodyPack*)WorldPack->rigidbodies.vec_ptr;
+				// for (auto Idx=0; Idx<NumOfBodies; ++Idx) {
+				// 	FVector Location(Bodies[Idx].px, (MirrorSyncY ? -1 : 1) * Bodies[Idx].py, Bodies[Idx].pz);
+				// 	FVector LinearVelocity(Bodies[Idx].lx, (MirrorSyncY ? -1 : 1) * Bodies[Idx].ly, Bodies[Idx].lz);
+				// 	uint16 NetID = Bodies[Idx].id;
+				// 	UNetRigidBody** NetRigidBody = NetRigidBodies.FindByPredicate([NetID](const UNetRigidBody* Item) {
+				// 		return IsValid(Item) && Item->NetID == NetID;
+				// 	});
+				// 	if (NetRigidBody != NULL && *NetRigidBody != NULL) {
+				// 		(*NetRigidBody)->SyncTarget = true;
+				// 		(*NetRigidBody)->TargetLocation = Location;
+				// 		(*NetRigidBody)->TargetLinearVelocity = LinearVelocity;
+				// 	}
+				// }
+				// uint64_t NumOfParts = WorldPack->avatarparts.vec_len;
+				// if (NumOfParts >= 4) {
+				// 	AvatarPack* Parts = (AvatarPack*)WorldPack->avatarparts.vec_ptr;
+				// 	uint16 NetID = Parts[0].id;
+				// 	UNetAvatar** NetAvatar = NetAvatars.FindByPredicate([NetID](const UNetAvatar* Item) {
+				// 		return IsValid(Item) && Item->NetID == NetID;
+				// 	});
+				// 	if (NetAvatar != NULL && *NetAvatar != NULL) {
+				// 		(*NetAvatar)->LastUpdateTime = CurrentTime;
+				// 		(*NetAvatar)->Location = FVector(Parts[0].px, Parts[0].py, Parts[0].pz);
+				// 		(*NetAvatar)->Rotation = FRotator(FQuat(Parts[0].rx, Parts[0].ry, Parts[0].rz, Parts[0].rw));
+				// 		(*NetAvatar)->LocationHMD = FVector(Parts[1].px, Parts[1].py, Parts[1].pz);
+				// 		(*NetAvatar)->RotationHMD = FRotator(FQuat(Parts[1].rx, Parts[1].ry, Parts[1].rz, Parts[1].rw));
+				// 		(*NetAvatar)->LocationHandL = FVector(Parts[2].px, Parts[2].py, Parts[2].pz);
+				// 		(*NetAvatar)->RotationHandL = FRotator(FQuat(Parts[2].rx, Parts[2].ry, Parts[2].rz, Parts[2].rw));
+				// 		(*NetAvatar)->LocationHandR = FVector(Parts[3].px, Parts[3].py, Parts[3].pz);
+				// 		(*NetAvatar)->RotationHandR = FRotator(FQuat(Parts[3].rx, Parts[3].ry, Parts[3].rz, Parts[3].rw));
+				// 	}
+				// 	else {
+				// 		MissingAvatar = (int)NetID;
+				// 		UE_LOG(RustyNet, Warning, TEXT("NetClient MissingAvatar: %i"), NetID);
+				// 	}
+				// }
+				// rd_netclient_drop_world(WorldPack);
+			}
+			else if (Msg[0] == 2) {
+				AvatarPack* Pack = rd_netclient_dec_avatar(&Msg[1], RustMsg->vec_len - 1);
+				uint16 NetID = Pack->id;
+				UNetAvatar** NetAvatar = NetAvatars.FindByPredicate([NetID](const UNetAvatar* Item) {
+					return IsValid(Item) && Item->NetID == NetID;
+				});
+				if (NetAvatar != NULL && *NetAvatar != NULL) {
+					(*NetAvatar)->LastUpdateTime = CurrentTime;
+					(*NetAvatar)->Location = FVector(Pack->root_px, Pack->root_py, Pack->root_pz);
+					(*NetAvatar)->Rotation = FRotator(FQuat(Pack->root_rx, Pack->root_ry, Pack->root_rz, Pack->root_rw));
+					(*NetAvatar)->LocationHMD = FVector(Pack->head_px, Pack->head_py, Pack->head_pz);
+					(*NetAvatar)->RotationHMD = FRotator(FQuat(Pack->head_rx, Pack->head_ry, Pack->head_rz, Pack->head_rw));
+					(*NetAvatar)->LocationHandL = FVector(Pack->handL_px, Pack->handL_py, Pack->handL_pz);
+					(*NetAvatar)->RotationHandL = FRotator(FQuat(Pack->handL_rx, Pack->handL_ry, Pack->handL_rz, Pack->handL_rw));
+					(*NetAvatar)->LocationHandR = FVector(Pack->handR_px, Pack->handR_py, Pack->handR_pz);
+					(*NetAvatar)->RotationHandR = FRotator(FQuat(Pack->handR_rx, Pack->handR_ry, Pack->handR_rz, Pack->handR_rw));
+					(*NetAvatar)->Height = Pack->height;
+					(*NetAvatar)->Floor = Pack->floor;
 				}
-				uint64_t NumOfParts = WorldPack->avatarparts.vec_len;
-				if (NumOfParts >= 4) {
-					AvatarPack* Parts = (AvatarPack*)WorldPack->avatarparts.vec_ptr;
-					uint16 NetID = Parts[0].id;
-					UNetAvatar** NetAvatar = NetAvatars.FindByPredicate([NetID](const UNetAvatar* Item) {
-						return IsValid(Item) && Item->NetID == NetID;
-					});
-					if (NetAvatar != NULL && *NetAvatar != NULL) {
-						(*NetAvatar)->LastUpdateTime = CurrentTime;
-						(*NetAvatar)->Location = FVector(Parts[0].px, Parts[0].py, Parts[0].pz);
-						(*NetAvatar)->Rotation = FRotator(FQuat(Parts[0].rx, Parts[0].ry, Parts[0].rz, Parts[0].rw));
-						(*NetAvatar)->LocationHMD = FVector(Parts[1].px, Parts[1].py, Parts[1].pz);
-						(*NetAvatar)->RotationHMD = FRotator(FQuat(Parts[1].rx, Parts[1].ry, Parts[1].rz, Parts[1].rw));
-						(*NetAvatar)->LocationHandL = FVector(Parts[2].px, Parts[2].py, Parts[2].pz);
-						(*NetAvatar)->RotationHandL = FRotator(FQuat(Parts[2].rx, Parts[2].ry, Parts[2].rz, Parts[2].rw));
-						(*NetAvatar)->LocationHandR = FVector(Parts[3].px, Parts[3].py, Parts[3].pz);
-						(*NetAvatar)->RotationHandR = FRotator(FQuat(Parts[3].rx, Parts[3].ry, Parts[3].rz, Parts[3].rw));
-					}
-					else {
-						MissingAvatar = (int)NetID;
-						UE_LOG(RustyNet, Warning, TEXT("NetClient MissingAvatar: %i"), NetID);
-					}
+				else {
+					MissingAvatar = (int)NetID;
+					UE_LOG(RustyNet, Warning, TEXT("NetClient MissingAvatar: %i"), NetID);
 				}
-				rd_netclient_drop_world(WorldPack);
+				rd_netclient_drop_avatar(Pack);
 			}
 			else if (Msg[0] == 10) { // System Float
 				uint8 MsgSystem = Msg[1];

@@ -51,6 +51,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NetAvatar")
 	FRotator RotationHandR;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NetAvatar")
+	float Height = 160;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NetAvatar")
+	float Floor = 0;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NetClient")
 	bool IsNetProxy = false;
 };
