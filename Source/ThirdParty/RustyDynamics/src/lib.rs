@@ -251,7 +251,7 @@ pub fn rd_netclient_drop_avatar(avatar: *mut Avatar) {
 #[no_mangle]
 pub fn rd_netclient_push_rigidbody(client: *mut Client, rigidbody: *const Rigidbody) {
     unsafe {
-        let mut msg = vec![2u8];
+        let mut msg = vec![3u8];
         let mut encoded: Vec<u8> = serialize(&(*rigidbody), Infinite).unwrap();
         msg.append(&mut encoded);
         (*client).sender_pubsub.send(msg);

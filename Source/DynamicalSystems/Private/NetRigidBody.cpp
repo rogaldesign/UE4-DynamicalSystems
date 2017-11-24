@@ -22,6 +22,7 @@ void UNetRigidBody::BeginPlay()
 
 	AActor* Actor = GetOwner();
 	TargetLocation = Actor->GetActorLocation();
+	TargetRotation = Actor->GetActorRotation();
 	URigidBodyController* PIDController = Actor->FindComponentByClass<URigidBodyController>();
 	if (PIDController && NetOwner != NetClient->NetIndex) {
 		PIDController->TargetLocation = TargetLocation;
@@ -42,7 +43,7 @@ void UNetRigidBody::TickComponent( float DeltaTime, ELevelTick TickType, FActorC
 		PIDController->TargetLocation = TargetLocation + TargetLinearVelocity * DeltaTime;
 		//PIDController->TargetRotation = TargetRotation;
 	}
-	else {
+	else if (PIDController) {
 		PIDController->Enabled = false;
 	}
     
