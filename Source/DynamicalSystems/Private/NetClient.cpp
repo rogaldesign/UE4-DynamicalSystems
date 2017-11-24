@@ -12,7 +12,6 @@ DEFINE_LOG_CATEGORY(RustyNet);
 ANetClient::ANetClient()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	Uuid = rb_uuid();
 }
 
 void ANetClient::RegisterRigidBody(UNetRigidBody* RigidBody)
@@ -58,13 +57,14 @@ void ANetClient::RebuildConsensus()
 void ANetClient::BeginPlay()
 {
     Super::BeginPlay();
-	//Uuid = FMath::RandRange(10000, 99999);
+	Uuid = rb_uuid();
     bool bCanBindAll;
     TSharedPtr<class FInternetAddr> localIp = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->GetLocalHostAddr(*GLog, bCanBindAll);
     Local = localIp->ToString(true);
     UE_LOG(RustyNet, Warning, TEXT("GetLocalHostAddr %s"), *Local);
     LastPingTime = UGameplayStatics::GetRealTimeSeconds(GetWorld());
-    LastBodyTime = LastPingTime;
+    LastAvatarTime = LastPingTime;
+	LastRigidbodyTime = LastPingTime;
     if (Client == NULL) {
         Client = rd_netclient_open(TCHAR_TO_ANSI(*Local), TCHAR_TO_ANSI(*Server), TCHAR_TO_ANSI(*MumbleServer));
         NetClients.Add(Uuid, -1);
@@ -87,7 +87,8 @@ void ANetClient::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
     
     float CurrentTime = UGameplayStatics::GetRealTimeSeconds(GetWorld());
-    float CurrentBodyTime = CurrentTime;
+    float CurrentAvatarTime = CurrentTime;
+	float CurrentRigidbodyTime = CurrentTime;
     
 	for (int Idx=0; Idx<NetRigidBodies.Num();) {
 		if (!IsValid(NetRigidBodies[Idx])) {
@@ -143,7 +144,7 @@ void ANetClient::Tick(float DeltaTime)
         LastPingTime = CurrentTime;
     }
     
-    if (CurrentBodyTime > LastBodyTime + 0.1) {
+    if (CurrentAvatarTime > LastAvatarTime + 0.1) {
 
 		if (IsValid(Avatar) && !Avatar->IsNetProxy) {
 			AvatarPack Pack;
@@ -197,35 +198,13 @@ void ANetClient::Tick(float DeltaTime)
         //         }
         //     }
         // }
-        
-        // RustVec WorldRigidBodies;
-        // WorldRigidBodies.vec_ptr = BodyPacks.Num() > 0 ? (uint64_t)&BodyPacks[0] : 0;
-        // WorldRigidBodies.vec_cap = BodyPacks.Num();
-        // WorldRigidBodies.vec_len = BodyPacks.Num();
-        // WorldPack.rigidbodies = WorldRigidBodies;
 
-		// TArray<AvatarPack> AvatarPacks;
-		// if (IsValid(Avatar) && !Avatar->IsNetProxy) {
-		// 	FVector Locations[] = { Avatar->Location, Avatar->LocationHMD, Avatar->LocationHandL, Avatar->LocationHandR };
-		// 	FQuat Rotations[] = { Avatar->Rotation.Quaternion(), Avatar->RotationHMD.Quaternion(), Avatar->RotationHandL.Quaternion(), Avatar->RotationHandR.Quaternion() };
-		// 	for (auto I = 0; I < 4; ++I) {
-		// 		AvatarPack Pack = { Avatar->NetID,
-		// 			Locations[I].X, Locations[I].Y, Locations[I].Z, 1,
-		// 			Rotations[I].X, Rotations[I].Y, Rotations[I].Z, Rotations[I].W,
-		// 		};
-		// 		AvatarPacks.Add(Pack);
-		// 	}
-		// 	RustVec AvatarParts;
-		// 	AvatarParts.vec_ptr = (uint64_t)&AvatarPacks[0];
-		// 	AvatarParts.vec_cap = 4;
-		// 	AvatarParts.vec_len = 4;
-		// 	WorldPack.avatarparts = AvatarParts;
-		// }
-
-        // rd_netclient_push_world(Client, &WorldPack);
-
-        LastBodyTime = CurrentBodyTime;
+        LastAvatarTime = CurrentAvatarTime;
     }
+
+	if (CurrentRigidbodyTime > LastRigidbodyTime + 0.1) {
+		
+	}
     
 	int Loop = 0;
 	for (; Loop < 1000; Loop += 1) {
