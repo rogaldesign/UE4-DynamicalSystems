@@ -210,7 +210,7 @@ pub struct RigidBody {
 #[repr(C)]
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct Avatar {
-    id: u16,
+    id: u32,
     root_px: f32, root_py: f32, root_pz: f32, root_pw: f32,
     root_rx: f32, root_ry: f32, root_rz: f32, root_rw: f32,
     head_px: f32, head_py: f32, head_pz: f32, head_pw: f32,

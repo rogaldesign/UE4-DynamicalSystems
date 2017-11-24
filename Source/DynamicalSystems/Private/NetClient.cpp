@@ -136,7 +136,10 @@ void ANetClient::Tick(float DeltaTime)
 		uint8* bytes = (uint8*)(&Uuid);
 		Msg[1] = bytes[0];
 		Msg[2] = bytes[1];
-        rd_netclient_msg_push(Client, Msg, 3);
+		Msg[3] = bytes[2];
+		Msg[4] = bytes[3];
+
+        rd_netclient_msg_push(Client, Msg, 5);
         LastPingTime = CurrentTime;
     }
     
@@ -146,6 +149,8 @@ void ANetClient::Tick(float DeltaTime)
 			AvatarPack Pack;
 			memset(&Pack, 0, sizeof(AvatarPack));
 			FQuat Rotation;
+
+			Pack.id = Avatar->NetID;
 
 			Pack.root_px = Avatar->Location.X; Pack.root_py = Avatar->Location.Y; Pack.root_pz = Avatar->Location.Z;
 			Rotation = Avatar->Rotation.Quaternion();
@@ -229,10 +234,10 @@ void ANetClient::Tick(float DeltaTime)
 		if (RustMsg->vec_len > 0) {
 
 			if (Msg[0] == 0) { // Ping
-				uint16 RemoteUuid = *((uint16*)(Msg + 1));
+				uint32 RemoteUuid = *((uint32*)(Msg + 1));
 				// float* KeyValue = NetClients.Find(RemoteUuid);
 				// if (KeyValue != NULL) {
-				// 	UE_LOG(RustyNet, Warning, TEXT("PING: %i %f"), RemoteUuid, (CurrentTime - (*KeyValue)));
+				UE_LOG(RustyNet, Warning, TEXT("PING: %i"), RemoteUuid);
 				// }
 				NetClients.Add(RemoteUuid, CurrentTime);
 				RebuildConsensus();
@@ -281,7 +286,7 @@ void ANetClient::Tick(float DeltaTime)
 			}
 			else if (Msg[0] == 2) {
 				AvatarPack* Pack = rd_netclient_dec_avatar(&Msg[1], RustMsg->vec_len - 1);
-				uint16 NetID = Pack->id;
+				uint32 NetID = Pack->id;
 				UNetAvatar** NetAvatar = NetAvatars.FindByPredicate([NetID](const UNetAvatar* Item) {
 					return IsValid(Item) && Item->NetID == NetID;
 				});

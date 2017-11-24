@@ -20,7 +20,7 @@ extern "C" {
     } RustVec;
 
     typedef struct AvatarPack {
-        uint16_t id;
+        uint32_t id;
         float root_px, root_py, root_pz, root_pw;
         float root_rx, root_ry, root_rz, root_rw;
         float head_px, head_py, head_pz, head_pw;
