@@ -1,3 +1,5 @@
+#![allow(non_snake_case)]
+
 extern crate tokio_core;
 extern crate futures;
 extern crate uuid;
@@ -13,6 +15,7 @@ use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::thread;
 use std::sync::{Arc, Mutex};
 use std::collections::VecDeque;
+use std::hash::{Hash, Hasher};
 
 use futures::{Future, Stream, Sink};
 use futures::future::{ok, err};
@@ -41,6 +44,13 @@ fn log(log: std::string::String) {
     unsafe { C_LOG(c_string.as_ptr()) };
 }
 
+#[no_mangle]
+pub fn rb_uuid() -> u32 {
+    let mut s = std::collections::hash_map::DefaultHasher::new();
+    uuid::Uuid::new_v4().hash(&mut s);
+    s.finish() as u32
+}
+
 impl UdpCodec for LineCodec {
     type In = (SocketAddr, Vec<u8>);
     type Out = (SocketAddr, Vec<u8>);
@@ -61,11 +71,6 @@ pub struct Client {
     sender_pubsub: futures::sink::Wait<futures::sync::mpsc::Sender<Vec<u8>>>,
     msg_queue: SharedQueue<Vec<u8>>,
     kill: futures::sink::Wait<futures::sync::mpsc::Sender<()>>,
-}
-
-#[no_mangle]
-pub fn rd_get_pow_2_of_int32(num: u32) -> u32 {
-    num * num
 }
 
 #[no_mangle]
@@ -195,16 +200,12 @@ pub fn netclient_open(local_addr: String, server_addr: String, mumble_addr: Stri
 
 #[repr(C)]
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
-pub struct RigidBody {
-    id: u16,
-    px: f32,
-    py: f32,
-    pz: f32,
-    pw: f32,
-    lx: f32,
-    ly: f32,
-    lz: f32,
-    lw: f32,
+pub struct Rigidbody {
+    id: u32,
+    px: f32, py: f32, pz: f32, pw: f32,
+    lx: f32, ly: f32, lz: f32, lw: f32,
+    rx: f32, ry: f32, rz: f32, rw: f32,
+    ax: f32, ay: f32, az: f32, aw: f32,
 }
 
 #[repr(C)]
@@ -220,38 +221,6 @@ pub struct Avatar {
     handR_px: f32, handR_py: f32, handR_pz: f32, handR_pw: f32,
     handR_rx: f32, handR_ry: f32, handR_rz: f32, handR_rw: f32,
     height: f32, floor: f32,
-}
-
-#[repr(C)]
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
-pub struct World {
-    avatar_parts: Vec<Avatar>,
-    rigid_bodies: Vec<RigidBody>,
-}
-
-#[no_mangle]
-pub fn rd_netclient_push_world(client: *mut Client, world: *const World) {
-    unsafe {
-        let mut msg = vec![1u8];
-        let mut encoded: Vec<u8> = serialize(&(*world), Infinite).unwrap();
-        msg.append(&mut encoded);
-        (*client).sender_pubsub.send(msg);
-    }
-}
-
-#[no_mangle]
-pub fn rd_netclient_dec_world(bytes: *const u8, count: u32) -> *const World {
-    unsafe {
-        let msg = std::slice::from_raw_parts(bytes, count as usize);
-        let world: World = deserialize(msg).unwrap();
-        let world = Box::new(world);
-        Box::into_raw(world)
-    }
-}
-
-#[no_mangle]
-pub fn rd_netclient_drop_world(world: *mut World) {
-    unsafe { Box::from_raw(world) };
 }
 
 #[no_mangle]
@@ -279,21 +248,27 @@ pub fn rd_netclient_drop_avatar(avatar: *mut Avatar) {
     unsafe { Box::from_raw(avatar) };
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
-pub struct TestEntity {
-    x: f32,
-    y: f32,
+#[no_mangle]
+pub fn rd_netclient_push_rigidbody(client: *mut Client, rigidbody: *const Rigidbody) {
+    unsafe {
+        let mut msg = vec![2u8];
+        let mut encoded: Vec<u8> = serialize(&(*rigidbody), Infinite).unwrap();
+        msg.append(&mut encoded);
+        (*client).sender_pubsub.send(msg);
+    }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
-pub struct TestWorld(Vec<TestEntity>);
-
-#[cfg(test)]
-mod tests {
-
-    use super::*;
-
-    #[test]
-    fn it_works() {
+#[no_mangle]
+pub fn rd_netclient_dec_rigidbody(bytes: *const u8, count: u32) -> *const Rigidbody {
+    unsafe {
+        let msg = std::slice::from_raw_parts(bytes, count as usize);
+        let rigidbody: Rigidbody = deserialize(msg).unwrap();
+        let rigidbody = Box::new(rigidbody);
+        Box::into_raw(rigidbody)
     }
+}
+
+#[no_mangle]
+pub fn rd_netclient_drop_rigidbody(rigidbody: *mut Rigidbody) {
+    unsafe { Box::from_raw(rigidbody) };
 }

@@ -12,7 +12,7 @@ DEFINE_LOG_CATEGORY(RustyNet);
 ANetClient::ANetClient()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	Uuid = FMath::RandRange(10000, 99999);
+	Uuid = rb_uuid();
 }
 
 void ANetClient::RegisterRigidBody(UNetRigidBody* RigidBody)
@@ -58,7 +58,7 @@ void ANetClient::RebuildConsensus()
 void ANetClient::BeginPlay()
 {
     Super::BeginPlay();
-	Uuid = FMath::RandRange(10000, 99999);
+	//Uuid = FMath::RandRange(10000, 99999);
     bool bCanBindAll;
     TSharedPtr<class FInternetAddr> localIp = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->GetLocalHostAddr(*GLog, bCanBindAll);
     Local = localIp->ToString(true);
