@@ -32,6 +32,8 @@ public:
     bool SyncTarget = false;
     FVector TargetLocation;
     FVector TargetLinearVelocity;
+	FRotator TargetRotation;
+	FVector TargetAngularVelocity;
     
 private:
     

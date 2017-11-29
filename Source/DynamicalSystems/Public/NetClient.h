@@ -23,11 +23,13 @@ class DYNAMICALSYSTEMS_API ANetClient : public AActor
     void* Client = NULL;
     
     float LastPingTime;
-    float LastBodyTime;
+
+	float LastAvatarTime;
+    float LastRigidbodyTime;
     
     void RebuildConsensus();
 
-public:	
+public:
 
 	ANetClient();
 
