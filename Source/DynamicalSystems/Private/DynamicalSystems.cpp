@@ -4,6 +4,7 @@
 #include "IPluginManager.h"
 #include "ModuleManager.h"
 #include "RustyDynamics.h"
+#include "Windows/WindowsPlatformMisc.h"
 
 #define LOCTEXT_NAMESPACE "FDynamicalSystemsModule"
 
@@ -34,7 +35,7 @@ void FDynamicalSystemsModule::StartupModule()
 		//Paths.Add(FPaths::Combine(*VeniceBaseDir, TEXT("Binaries/ThirdParty/tensorflow")));
 		Paths.Add(FString(OldPath));
 		FString Path = FString::Join(Paths, TEXT(";"));
-		FGenericPlatformMisc::SetEnvironmentVar(L"PATH", *Path);
+		FWindowsPlatformMisc::SetEnvironmentVar(L"PATH", *Path);
 	}
 
 	// Get the base directory of this plugin

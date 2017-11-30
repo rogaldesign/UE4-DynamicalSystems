@@ -78,7 +78,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NetClient")
 	FString MumbleServer = "127.0.0.1:8080";
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NetClient")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NetClient")
 	int32 Uuid;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NetClient")
