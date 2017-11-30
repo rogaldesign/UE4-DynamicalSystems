@@ -26,7 +26,7 @@ void FDynamicalSystemsModule::StartupModule()
 		FGenericPlatformMisc::GetEnvironmentVariable(L"PATH", OldPath, BufferSize);
 		FPlatformProcess::AddDllDirectory(
 			*FPaths::Combine(*VeniceBaseDir, TEXT("gstreamer/1.0/x86_64/bin")));
-		FGenericPlatformMisc::SetEnvironmentVar(
+		FWindowsPlatformMisc::SetEnvironmentVar(
 			L"GST_PLUGIN_PATH",
 			*FPaths::Combine(*VeniceBaseDir, TEXT("gstreamer/1.0/x86_64/lib")));
 		TArray<FString> Paths;
@@ -34,7 +34,7 @@ void FDynamicalSystemsModule::StartupModule()
 		//Paths.Add(FPaths::Combine(*VeniceBaseDir, TEXT("Binaries/ThirdParty/tensorflow")));
 		Paths.Add(FString(OldPath));
 		FString Path = FString::Join(Paths, TEXT(";"));
-		FGenericPlatformMisc::SetEnvironmentVar(L"PATH", *Path);
+		FWindowsPlatformMisc::SetEnvironmentVar(L"PATH", *Path);
 	}
 
 	// Get the base directory of this plugin

@@ -38,7 +38,9 @@ public class DynamicalSystems : ModuleRules
 				"Projects",
 				"InputCore",
 				"AnimGraphRuntime",
-				"AnimationCore"
+				"AnimationCore",
+                "GameplayAbilities",
+                "GameplayTags"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);

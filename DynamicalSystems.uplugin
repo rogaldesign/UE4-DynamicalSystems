@@ -19,10 +19,16 @@
       "Type": "Runtime",
       "LoadingPhase": "Default"
     },
-	{
+    {
       "Name": "DynamicalSystemsEditor",
       "Type": "Editor",
       "LoadingPhase": "Default"
+    }
+  ],
+  "Plugins": [
+    {
+      "Name": "GameplayAbilities",
+      "Enabled": true
     }
   ]
 }
