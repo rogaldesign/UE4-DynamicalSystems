@@ -33,7 +33,6 @@ public class DynamicalSystems : ModuleRules
                 "PhysX",
                 "APEX",
                 "Sockets",
-                "Voice",
                 "RustyDynamics",
 				"Projects",
 				"InputCore",
