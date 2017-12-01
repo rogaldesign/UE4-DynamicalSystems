@@ -5,8 +5,6 @@
 #include <vector>
 #include "CoreMinimal.h"
 #include "NetClient.h"
-#include "Sound/SoundWaveProcedural.h"
-#include "Runtime/Online/Voice/Public/VoiceModule.h"
 #include "NetVoice.generated.h"
 
 
@@ -29,19 +27,7 @@ public:
     ANetClient* NetClient = NULL;
     
     void Say(uint8* Bytes, uint32 Count);
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NetVoice")
-	USoundWaveProcedural* SoundStream;
-
-	uint32 Activity = 0;
     
 private:
-    
-    TSharedPtr <class IVoiceCapture> VoiceCapture;
 
-    uint32 SampleRate;
-	uint32 SayActivity = 0;
-
-	TCircularBuffer<int16>* SampleBuffer;
-	uint32 SampleBufferIdx = 0;
 };

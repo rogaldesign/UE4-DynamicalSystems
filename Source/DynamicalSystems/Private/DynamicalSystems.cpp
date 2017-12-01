@@ -2,8 +2,10 @@
 
 #include "Core.h"
 #include "IPluginManager.h"
-#include "ModuleManager.h"
 #include "RustyDynamics.h"
+
+#include "WindowsHWrapper.h"
+#include <windows.h>
 
 #define LOCTEXT_NAMESPACE "FDynamicalSystemsModule"
 
@@ -14,8 +16,6 @@ extern "C" void ffi_log(const char* log)
 
 void FDynamicalSystemsModule::StartupModule()
 {
-	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
-
 	auto VenicePlugin = IPluginManager::Get().FindPlugin("Venice");
 	if (VenicePlugin.IsValid()) {
 		FString VeniceBaseDir = VenicePlugin->GetBaseDir();
@@ -26,15 +26,14 @@ void FDynamicalSystemsModule::StartupModule()
 		FGenericPlatformMisc::GetEnvironmentVariable(L"PATH", OldPath, BufferSize);
 		FPlatformProcess::AddDllDirectory(
 			*FPaths::Combine(*VeniceBaseDir, TEXT("gstreamer/1.0/x86_64/bin")));
-		FWindowsPlatformMisc::SetEnvironmentVar(
+		SetEnvironmentVariable(
 			L"GST_PLUGIN_PATH",
 			*FPaths::Combine(*VeniceBaseDir, TEXT("gstreamer/1.0/x86_64/lib")));
 		TArray<FString> Paths;
 		Paths.Add(FPaths::Combine(*VeniceBaseDir, TEXT("gstreamer/1.0/x86_64/bin")));
-		//Paths.Add(FPaths::Combine(*VeniceBaseDir, TEXT("Binaries/ThirdParty/tensorflow")));
 		Paths.Add(FString(OldPath));
 		FString Path = FString::Join(Paths, TEXT(";"));
-		FWindowsPlatformMisc::SetEnvironmentVar(L"PATH", *Path);
+		SetEnvironmentVariable(L"PATH", *Path);
 	}
 
 	// Get the base directory of this plugin
@@ -53,22 +52,11 @@ void FDynamicalSystemsModule::StartupModule()
 	if (RustyDynamicsHandle)
 	{
 		rb_log_fn(ffi_log);
-		//TestFFI();
-		// Call the test function in the third party library that opens a message box
-        
-		//ExampleLibraryFunction();
-//        FString CoordinateString = FString::Printf(TEXT("rd_get_pow_2_of_int32 %i"), rd_get_pow_2_of_int32(12));
-//        FMessageDialog::Open(EAppMsgType::Ok, FText::AsCultureInvariant(CoordinateString));
-        
-//        const char* addr = std::string("127.shit.0.0:8080").c_str();
-//        rd_netclient_new(addr);
 	}
 	else
 	{
 		//FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("ThirdPartyLibraryError", "Failed to load example third party library"));
 	}
-
-
 }
 
 void FDynamicalSystemsModule::ShutdownModule()
