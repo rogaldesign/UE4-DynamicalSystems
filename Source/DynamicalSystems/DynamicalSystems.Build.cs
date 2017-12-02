@@ -32,14 +32,14 @@ public class DynamicalSystems : ModuleRules
                 "Engine",
                 "PhysX",
                 "APEX",
-                "Sockets",
                 "RustyDynamics",
 				"Projects",
 				"InputCore",
 				"AnimGraphRuntime",
 				"AnimationCore",
                 "GameplayAbilities",
-                "GameplayTags"
+                "GameplayTags",
+                "Sockets"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);

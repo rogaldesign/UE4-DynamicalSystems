@@ -23,15 +23,16 @@ void FDynamicalSystemsModule::StartupModule()
 			65535;  // Limit according to
 					// http://msdn.microsoft.com/en-us/library/ms683188.aspx
 		TCHAR OldPath[BufferSize];
-		FGenericPlatformMisc::GetEnvironmentVariable(L"PATH", OldPath, BufferSize);
+		GetEnvironmentVariableW(L"PATH", OldPath, BufferSize);
 		FPlatformProcess::AddDllDirectory(
 			*FPaths::Combine(*VeniceBaseDir, TEXT("gstreamer/1.0/x86_64/bin")));
 		SetEnvironmentVariable(
 			L"GST_PLUGIN_PATH",
 			*FPaths::Combine(*VeniceBaseDir, TEXT("gstreamer/1.0/x86_64/lib")));
+		
 		TArray<FString> Paths;
-		Paths.Add(FPaths::Combine(*VeniceBaseDir, TEXT("gstreamer/1.0/x86_64/bin")));
 		Paths.Add(FString(OldPath));
+		Paths.Add(FPaths::Combine(*VeniceBaseDir, TEXT("gstreamer/1.0/x86_64/bin")));
 		FString Path = FString::Join(Paths, TEXT(";"));
 		SetEnvironmentVariable(L"PATH", *Path);
 	}
