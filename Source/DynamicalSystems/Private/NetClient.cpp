@@ -5,6 +5,7 @@
 #include "RustyDynamics.h"
 #include "SocketSubsystem.h"
 #include "IPAddress.h"
+#include "Base64.h"
 #include "DynamicalSystemsPrivatePCH.h"
 
 DEFINE_LOG_CATEGORY(RustyNet);
@@ -208,7 +209,7 @@ void ANetClient::Tick(float DeltaTime)
 				uint32 RemoteUuid = *((uint32*)(Msg + 1));
 				// float* KeyValue = NetClients.Find(RemoteUuid);
 				// if (KeyValue != NULL) {
-				UE_LOG(RustyNet, Warning, TEXT("PING: %i"), RemoteUuid);
+				// UE_LOG(RustyNet, Warning, TEXT("PING: %i"), RemoteUuid);
 				// }
 				NetClients.Add(RemoteUuid, CurrentTime);
 				RebuildConsensus();
@@ -271,8 +272,9 @@ void ANetClient::Tick(float DeltaTime)
 			else if (Msg[0] == 12) { // System String
 				uint8 MsgSystem = Msg[1];
 				uint8 MsgId = Msg[2];
-				const char* MsgValuePtr = (const char*)(Msg + 3);
-				FString MsgValue(MsgValuePtr);
+				FString MsgValueBase64 = BytesToString(Msg + 3, RustMsg->vec_len - 3);
+				FString MsgValue;
+				FBase64::Decode(MsgValueBase64, MsgValue);
 				UE_LOG(RustyNet, Warning, TEXT("Msg IN MsgSystem: %u MsgId: %u MsgValue: %s"), Msg[1], Msg[2], *MsgValue);
 				OnSystemStringMsg.Broadcast(MsgSystem, MsgId, *MsgValue);
 			}
@@ -330,11 +332,8 @@ void ANetClient::SendSystemString(int32 System, int32 Id, FString Value)
 	Msg[1] = (uint8)System;
 	Msg[2] = (uint8)Id;
 
-	const char* String = TCHAR_TO_ANSI(*Value);
-	uint32 StringLen = (uint32)strnlen(String, 1000);
-	strncpy((char*)(Msg + 3), String, StringLen);
+	int16 Len = StringToBytes(FBase64::Encode(Value), Msg + 3, 1024) + 1;
 
-	UE_LOG(RustyNet, Warning, TEXT("Msg OUT System Int: %u MsgId: %u MsgValue: %s"), Msg[1], Msg[2], *Value);
-	rd_netclient_msg_push(Client, Msg, StringLen + 10);
+	UE_LOG(RustyNet, Warning, TEXT("Msg OUT System String: %u MsgId: %u MsgValue: %s"), Msg[1], Msg[2], *Value);
+	rd_netclient_msg_push(Client, Msg, Len + 3);
 }
-
