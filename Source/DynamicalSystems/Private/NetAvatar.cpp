@@ -36,7 +36,7 @@ void UNetAvatar::TickComponent( float DeltaTime, ELevelTick TickType, FActorComp
 
 	float CurrentTime = UGameplayStatics::GetRealTimeSeconds(GetWorld());
 
-	if (!IsNetProxy && IsValid(NetClient)) {
+	if (!IsNetProxy) {
 		LastUpdateTime = CurrentTime;
 	}
 
