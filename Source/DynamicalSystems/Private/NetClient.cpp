@@ -62,10 +62,6 @@ void ANetClient::BeginPlay()
 {
     Super::BeginPlay();
 	//Uuid = FMath::RandRange(100000, 999999);
-
-	TArray<uint8> Mac = FWindowsPlatformMisc::GetMacAddress();
-	Uuid = *(uint16*)(&Mac[3]);
-
     bool bCanBindAll;
     TSharedPtr<class FInternetAddr> localIp = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->GetLocalHostAddr(*GLog, bCanBindAll);
     Local = localIp->ToString(true);

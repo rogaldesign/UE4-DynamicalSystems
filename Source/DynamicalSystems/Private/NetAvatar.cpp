@@ -21,19 +21,18 @@ void UNetAvatar::BeginPlay()
 
 	LastUpdateTime = UGameplayStatics::GetRealTimeSeconds(GetWorld());
 
-	if (IsNetProxy && IsValid(NetClient)) {
+	if (IsNetProxy) {
 		NetClient->RegisterAvatar(this);
+	}
+	else if (IsValid(NetClient)) {
+		NetClient->Avatar = this;
+		NetID = NetClient->Uuid;
 	}
 }
 
 void UNetAvatar::TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction )
 {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
-
-	if (NetID == 0 && IsValid(NetClient)) {
-		NetClient->Avatar = this;
-		NetID = NetClient->Uuid;
-	}
 
 	float CurrentTime = UGameplayStatics::GetRealTimeSeconds(GetWorld());
 
