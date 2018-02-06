@@ -34,6 +34,7 @@ public:
 	ANetClient();
 
 protected:
+	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
     virtual void BeginDestroy() override;
 
@@ -78,7 +79,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NetClient")
 	FString MumbleServer = "127.0.0.1:8080";
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NetClient")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NetClient")
 	int32 Uuid;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NetClient")
