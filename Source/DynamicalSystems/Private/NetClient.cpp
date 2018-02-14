@@ -58,13 +58,13 @@ void ANetClient::RebuildConsensus()
 void ANetClient::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	TArray<uint8> Mac = FWindowsPlatformMisc::GetMacAddress();
-	Uuid = *(uint16*)(&Mac[3]);
+	Uuid = rb_uuid();
 }
 
 void ANetClient::BeginPlay()
 {
     Super::BeginPlay();
+
     bool bCanBindAll;
     TSharedPtr<class FInternetAddr> localIp = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->GetLocalHostAddr(*GLog, bCanBindAll);
     Local = localIp->ToString(true);

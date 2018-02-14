@@ -48,7 +48,7 @@ fn log(log: std::string::String) {
 pub fn rb_uuid() -> u32 {
     let mut s = std::collections::hash_map::DefaultHasher::new();
     uuid::Uuid::new_v4().hash(&mut s);
-    s.finish() as u32
+    ((s.finish() + 10000) as u16) as u32 | 0b00000000000000100000000000000000
 }
 
 impl UdpCodec for LineCodec {
