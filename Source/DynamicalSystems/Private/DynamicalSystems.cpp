@@ -52,7 +52,8 @@ void FDynamicalSystemsModule::StartupModule()
 
 	if (RustyDynamicsHandle)
 	{
-		rb_log_fn(ffi_log);
+		//TODO: investigate this unfortunate 4.19 thread-safety issue
+		//rb_log_fn(ffi_log);
 	}
 	else
 	{
