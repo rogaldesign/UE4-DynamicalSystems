@@ -6,7 +6,11 @@ extern crate uuid;
 #[macro_use]
 extern crate serde_derive;
 extern crate bincode;
+extern crate cgmath;
 pub extern crate mumblebot;
+
+use mumblebot::positional;
+use cgmath::*;
 
 use bincode::{serialize, deserialize, Infinite};
 
@@ -69,6 +73,8 @@ type SharedQueue<T> = std::sync::Arc<std::sync::Mutex<std::collections::VecDeque
 
 pub struct Client {
     sender_pubsub: futures::sink::Wait<futures::sync::mpsc::Sender<Vec<u8>>>,
+    positional: futures::sink::Wait<futures::sync::mpsc::Sender<positional::PositionalAudio>>,
+    listener: futures::sink::Wait<futures::sync::mpsc::Sender<positional::PositionalAudio>>,
     msg_queue: SharedQueue<Vec<u8>>,
     kill: futures::sink::Wait<futures::sync::mpsc::Sender<()>>,
 }
@@ -132,14 +138,29 @@ pub fn netclient_open(local_addr: String, server_addr: String, mumble_addr: Stri
 
     let (ffi_tx, ffi_rx) = futures::sync::mpsc::channel::<Vec<u8>>(1000);
 
+    let (positional_tx, positional_rx) = futures::sync::mpsc::channel::<positional::PositionalAudio>(10);
+    let (listener_tx, listener_rx) = futures::sync::mpsc::channel::<positional::PositionalAudio>(10);
+
     let (vox_out_tx, vox_out_rx) = futures::sync::mpsc::channel::<Vec<u8>>(1000);
-    let (vox_inp_tx, vox_inp_rx) = futures::sync::mpsc::channel::<(i32, Vec<u8>)>(1000);
+    let mut voxs = Vec::new();
+    let mut vox_inp_rxs = Vec::new();
+    for _ in 0..16 {
+        let (vox_inp_tx, vox_inp_rx) = futures::sync::mpsc::channel::<(Vec<u8>, positional::PositionalAudio)>(1000);
+        voxs.push(positional::VoxIn {
+            session_id: 999999999,
+            last_io: std::time::SystemTime::now(),
+            tx: vox_inp_tx,
+        });
+        vox_inp_rxs.push(vox_inp_rx);
+    }
 
     let msg_queue: VecDeque<Vec<u8>> = VecDeque::new();
     let msg_queue = Arc::new(Mutex::new(msg_queue));
 
     let client = Box::new(Client{
         sender_pubsub: ffi_tx.wait(),
+        positional: positional_tx.wait(),
+        listener: listener_tx.wait(),
         msg_queue: Arc::clone(&msg_queue),
         kill: kill_tx.wait(),
     });
@@ -149,12 +170,12 @@ pub fn netclient_open(local_addr: String, server_addr: String, mumble_addr: Stri
         let mut core = Core::new().unwrap();
         let handle = core.handle();
 
-        let (mumble_loop, _tcp_tx, udp_tx) = mumblebot::run(local_addr, mumble_addr, vox_inp_tx.clone(), &handle);
+        let (mumble_loop, _tcp_tx, udp_tx) = mumblebot::run(local_addr, mumble_addr, voxs, &handle);
 
-        let mumble_say = mumblebot::say(vox_out_rx, udp_tx.clone());
+        let mumble_say = mumblebot::say(vox_out_rx, positional_rx, udp_tx.clone()); 
 
         let kill_sink = mumblebot::gst::sink_main(vox_out_tx.clone());
-        let (kill_src, mumble_listen) = mumblebot::gst::src_main(vox_inp_rx);
+        let (kill_src, mumble_listen) = mumblebot::gst::src_main(listener_rx, vox_inp_rxs);
         
         let udp_socket = UdpSocket::bind(&local_addr, &handle).unwrap();
         let (tx, rx) = udp_socket.framed(LineCodec).split();
@@ -229,7 +250,19 @@ pub fn rd_netclient_push_avatar(client: *mut Client, avatar: *const Avatar) {
         let mut msg = vec![2u8];
         let mut encoded: Vec<u8> = serialize(&(*avatar), Infinite).unwrap();
         msg.append(&mut encoded);
-        (*client).sender_pubsub.send(msg);
+        if let Err(err) = (*client).sender_pubsub.send(msg) {
+             log(format!("rd_netclient_push_avatar: {}", err));
+        }
+        let pos = positional::PositionalAudio{
+            loc: vec3((*avatar).head_px, (*avatar).head_py, (*avatar).head_pz),
+            rot: Quaternion::new((*avatar).head_rw, (*avatar).head_rx, (*avatar).head_ry, (*avatar).head_rz),
+        };
+        if let Err(err) = (*client).positional.send(pos) {
+            log(format!("rd_netclient_push_avatar positional: {}", err));
+        }
+        if let Err(err) = (*client).listener.send(pos) {
+            log(format!("rd_netclient_push_avatar listener: {}", err));
+        }
     }
 }
 
