@@ -253,16 +253,16 @@ pub fn rd_netclient_push_avatar(client: *mut Client, avatar: *const Avatar) {
         if let Err(err) = (*client).sender_pubsub.send(msg) {
              log(format!("rd_netclient_push_avatar: {}", err));
         }
-        let pos = positional::PositionalAudio{
-            loc: vec3((*avatar).head_px, (*avatar).head_py, (*avatar).head_pz),
-            rot: Quaternion::new((*avatar).head_rw, (*avatar).head_rx, (*avatar).head_ry, (*avatar).head_rz),
-        };
-        if let Err(err) = (*client).positional.send(pos) {
-            log(format!("rd_netclient_push_avatar positional: {}", err));
-        }
-        if let Err(err) = (*client).listener.send(pos) {
-            log(format!("rd_netclient_push_avatar listener: {}", err));
-        }
+        // let pos = positional::PositionalAudio{
+        //     loc: vec3((*avatar).head_px, (*avatar).head_py, (*avatar).head_pz),
+        //     rot: Quaternion::new((*avatar).head_rw, (*avatar).head_rx, (*avatar).head_ry, (*avatar).head_rz),
+        // };
+        // if let Err(err) = (*client).positional.send(pos) {
+        //     log(format!("rd_netclient_push_avatar positional: {}", err));
+        // }
+        // if let Err(err) = (*client).listener.send(pos) {
+        //     log(format!("rd_netclient_push_avatar listener: {}", err));
+        // }
     }
 }
 
