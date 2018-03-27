@@ -175,7 +175,7 @@ pub fn netclient_open(local_addr: String, server_addr: String, mumble_addr: Stri
         let mumble_say = mumblebot::say(vox_out_rx, positional_rx, udp_tx.clone()); 
 
         let kill_sink = mumblebot::gst::sink_main(vox_out_tx.clone());
-        let (kill_src, mumble_listen) = mumblebot::gst::src_main(listener_rx, vox_inp_rxs);
+        let (kill_src, mumble_listen, listener_task) = mumblebot::gst::src_main(listener_rx, vox_inp_rxs);
         
         let udp_socket = UdpSocket::bind(&local_addr, &handle).unwrap();
         let (tx, rx) = udp_socket.framed(LineCodec).split();
@@ -207,7 +207,7 @@ pub fn netclient_open(local_addr: String, server_addr: String, mumble_addr: Stri
         let msg_tasks = Future::join(msg_inp_task, msg_out_task);
         let mum_tasks = Future::join(mumble_say, mumble_listen);
 
-        if let Err(err) = core.run(Future::join4(mum_tasks, msg_tasks, mumble_loop, kill_switch)) {
+        if let Err(err) = core.run(Future::join5(mum_tasks, msg_tasks, mumble_loop, listener_task, kill_switch)) {
         // if let Err(err) = core.run(Future::join(mum_tasks, mumble_loop)) {
             log(format!("rd_netclient_open: {}", err));
         }
@@ -253,16 +253,16 @@ pub fn rd_netclient_push_avatar(client: *mut Client, avatar: *const Avatar) {
         if let Err(err) = (*client).sender_pubsub.send(msg) {
              log(format!("rd_netclient_push_avatar: {}", err));
         }
-        // let pos = positional::PositionalAudio{
-        //     loc: vec3((*avatar).head_px, (*avatar).head_py, (*avatar).head_pz),
-        //     rot: Quaternion::new((*avatar).head_rw, (*avatar).head_rx, (*avatar).head_ry, (*avatar).head_rz),
-        // };
-        // if let Err(err) = (*client).positional.send(pos) {
-        //     log(format!("rd_netclient_push_avatar positional: {}", err));
-        // }
-        // if let Err(err) = (*client).listener.send(pos) {
-        //     log(format!("rd_netclient_push_avatar listener: {}", err));
-        // }
+        let pos = positional::PositionalAudio{
+            loc: vec3((*avatar).head_px, (*avatar).head_py, (*avatar).head_pz),
+            rot: Quaternion::new((*avatar).head_rw, (*avatar).head_rx, (*avatar).head_ry, (*avatar).head_rz),
+        };
+        if let Err(err) = (*client).positional.send(pos) {
+            log(format!("rd_netclient_push_avatar positional: {}", err));
+        }
+        if let Err(err) = (*client).listener.send(pos) {
+            log(format!("rd_netclient_push_avatar listener: {}", err));
+        }
     }
 }
 
