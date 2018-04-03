@@ -12,7 +12,7 @@ fn main() {
     let server_addr = "138.197.212.55:8080".to_string();
     let mumble_addr = "138.68.48.30:64738".to_string();
 
-    netclient_open(local_addr, server_addr, mumble_addr);
+    netclient_open(local_addr, server_addr, mumble_addr, "".to_string());
 
     std::thread::park();
 }

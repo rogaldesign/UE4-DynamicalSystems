@@ -33,7 +33,7 @@ extern "C" {
 
     uint32_t rb_uuid();
 
-    void* rd_netclient_open(const char* local_addr, const char* server_addr, const char* mumble_addr);
+    void* rd_netclient_open(const char* local_addr, const char* server_addr, const char* mumble_addr, const char* audio_src);
     void rd_netclient_drop(void* client);
 
     void rd_netclient_msg_push(void* client, const uint8* bytes, uint32_t count);

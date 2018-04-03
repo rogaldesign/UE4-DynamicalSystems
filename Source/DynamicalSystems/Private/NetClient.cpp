@@ -73,7 +73,7 @@ void ANetClient::BeginPlay()
     LastAvatarTime = LastPingTime;
 	LastRigidbodyTime = LastPingTime;
     if (Client == NULL) {
-        Client = rd_netclient_open(TCHAR_TO_ANSI(*Local), TCHAR_TO_ANSI(*Server), TCHAR_TO_ANSI(*MumbleServer));
+        Client = rd_netclient_open(TCHAR_TO_ANSI(*Local), TCHAR_TO_ANSI(*Server), TCHAR_TO_ANSI(*MumbleServer), TCHAR_TO_ANSI(*AudioDevice));
         NetClients.Add(Uuid, -1);
         UE_LOG(RustyNet, Warning, TEXT("NetClient BeginPlay %i"), Uuid);
     }

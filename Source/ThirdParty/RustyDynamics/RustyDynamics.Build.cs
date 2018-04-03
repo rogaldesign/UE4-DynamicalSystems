@@ -11,7 +11,7 @@ public class RustyDynamics : ModuleRules
 
 		if (Target.Platform == UnrealTargetPlatform.Win64)
 		{
-            PublicLibraryPaths.Add(Path.Combine(ModuleDirectory, "target", "Debug", "deps"));
+            PublicLibraryPaths.Add(Path.Combine(ModuleDirectory, "target", "release"));
             PublicAdditionalLibraries.Add("RustyDynamics.dll.lib");
             PublicDelayLoadDLLs.Add("RustyDynamics.dll");
         }

@@ -79,6 +79,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NetClient")
 	FString MumbleServer = "127.0.0.1:8080";
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NetClient")
+	FString AudioDevice = "";
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NetClient")
 	int32 Uuid;
 
