@@ -1,10 +1,15 @@
 // Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
-
+using System.IO;
 using UnrealBuildTool;
 
 public class DynamicalSystems : ModuleRules
 {
-	public DynamicalSystems(ReadOnlyTargetRules Target) : base(Target)
+    private string ModulePath
+    {
+        get { return ModuleDirectory; }
+    }
+
+    public DynamicalSystems(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
@@ -60,5 +65,61 @@ public class DynamicalSystems : ModuleRules
 				// ... add any modules that your module loads dynamically here ...
 			}
 			);
-	}
+        LoadDynSysLibs(Target);
+
+    }
+    public void LoadDynSysLibs(ReadOnlyTargetRules Target)
+    {
+        //RustyDynamics
+        string PlatformString = Target.Platform.ToString();
+        AddDependency(Target,Path.Combine(ThirdPartyPath, "RustyDynamics/target/Release/"), "RustyDynamics.dll");
+        AddDependency(Target, Path.Combine(BinaryFolderPath, PlatformString), "libeay32.dll");
+        AddDependency(Target, Path.Combine(BinaryFolderPath, PlatformString), "ovraudio64.dll");
+    }
+    void AddDependency(ReadOnlyTargetRules Target,string DllPath,string DLLName)
+    {
+        string PlatformString = Target.Platform.ToString();
+        string PluginDLLPath = Path.Combine(DllPath, DLLName);
+        System.Console.WriteLine("Project plugin: "+ DLLName +" detected, using dll at " + PluginDLLPath);
+        CopyToProjectBinaries(PluginDLLPath, Target);
+        string DLLPath = Path.GetFullPath(Path.Combine(GetUProjectPath, "Binaries", PlatformString, DLLName));
+        RuntimeDependencies.Add(DLLPath);
+    }
+    private string BinaryFolderPath
+    {
+        get
+        {
+            return Path.GetFullPath(Path.Combine(ModulePath, "../../Binaries/")); 
+        }
+    }
+    private string ThirdPartyPath
+    {
+        get { return Path.GetFullPath(Path.Combine(ModulePath, "../../Source/ThirdParty/")); }
+    }
+
+    public string GetUProjectPath
+    {
+        get
+        {
+            return System.IO.Path.Combine(ModuleDirectory, "../../../../");
+            return Directory.GetParent(ModulePath).Parent.Parent.ToString();
+        }
+    }
+    private void CopyToProjectBinaries(string Filepath, ReadOnlyTargetRules Target)
+    {
+        System.Console.WriteLine("uprojectpath is: " + Path.GetFullPath(GetUProjectPath));
+        System.Console.WriteLine("ThirdPartyPath is: " + Path.GetFullPath(ThirdPartyPath));
+        string binariesDir = Path.Combine(GetUProjectPath, "Binaries", Target.Platform.ToString());
+        string filename = Path.GetFileName(Filepath);
+        string fullBinariesDir = Path.GetFullPath(binariesDir);
+
+        if (!Directory.Exists(fullBinariesDir))
+            Directory.CreateDirectory(fullBinariesDir);
+
+        if (!File.Exists(Path.Combine(fullBinariesDir, filename)))
+        {
+            System.Console.WriteLine("DynSys: Copied from " + Filepath + ", to " + Path.Combine(fullBinariesDir, filename));
+            File.Copy(Filepath, Path.Combine(fullBinariesDir, filename), true);
+        }
+    }
 }
