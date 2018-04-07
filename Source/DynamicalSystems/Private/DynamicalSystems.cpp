@@ -8,7 +8,7 @@
 #include <windows.h>
 
 #define LOCTEXT_NAMESPACE "FDynamicalSystemsModule"
-
+#define DISABLE_VENICE 1
 extern "C" void ffi_log(const char* log)
 {
 	UE_LOG(LogTemp, Warning, TEXT("[Rust] %s"), UTF8_TO_TCHAR(log));
@@ -17,6 +17,7 @@ extern "C" void ffi_log(const char* log)
 void FDynamicalSystemsModule::StartupModule()
 {
 	auto VenicePlugin = IPluginManager::Get().FindPlugin("Venice");
+#ifndef DISABLE_VENICE
 	if (VenicePlugin.IsValid()) {
 		FString VeniceBaseDir = VenicePlugin->GetBaseDir();
 		const int BufferSize =
@@ -36,7 +37,7 @@ void FDynamicalSystemsModule::StartupModule()
 		FString Path = FString::Join(Paths, TEXT(";"));
 		SetEnvironmentVariable(L"PATH", *Path);
 	}
-
+#endif
 	// Get the base directory of this plugin
 	FString BaseDir = IPluginManager::Get().FindPlugin("DynamicalSystems")->GetBaseDir();
 //
