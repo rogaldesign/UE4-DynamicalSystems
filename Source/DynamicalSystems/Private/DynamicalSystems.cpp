@@ -8,7 +8,7 @@
 #include <windows.h>
 
 #define LOCTEXT_NAMESPACE "FDynamicalSystemsModule"
-
+#define DISABLE_VENICE 1
 extern "C" void ffi_log(const char* log)
 {
 	UE_LOG(LogTemp, Warning, TEXT("[Rust] %s"), UTF8_TO_TCHAR(log));
@@ -17,6 +17,7 @@ extern "C" void ffi_log(const char* log)
 void FDynamicalSystemsModule::StartupModule()
 {
 	auto VenicePlugin = IPluginManager::Get().FindPlugin("Venice");
+#ifndef DISABLE_VENICE
 	if (VenicePlugin.IsValid()) {
 		FString VeniceBaseDir = VenicePlugin->GetBaseDir();
 		const int BufferSize =
@@ -36,19 +37,19 @@ void FDynamicalSystemsModule::StartupModule()
 		FString Path = FString::Join(Paths, TEXT(";"));
 		SetEnvironmentVariable(L"PATH", *Path);
 	}
-
+#endif
 	// Get the base directory of this plugin
 	FString BaseDir = IPluginManager::Get().FindPlugin("DynamicalSystems")->GetBaseDir();
-
-	// Add on the relative location of the third party dll and load it
-	FString LibraryPath;
-#if PLATFORM_WINDOWS
-	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/ThirdParty/RustyDynamics/target/Debug/RustyDynamics.dll"));
-#elif PLATFORM_MAC
-    LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/ThirdParty/RustyDynamics/target/Debug/libRustyDynamics.dylib"));
-#endif // PLATFORM_WINDOWS
-
-	RustyDynamicsHandle = !LibraryPath.IsEmpty() ? FPlatformProcess::GetDllHandle(*LibraryPath) : nullptr;
+//
+//	// Add on the relative location of the third party dll and load it
+//	FString LibraryPath;
+//#if PLATFORM_WINDOWS
+//	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/ThirdParty/RustyDynamics/target/Debug/RustyDynamics.dll"));
+//#elif PLATFORM_MAC
+//    LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/ThirdParty/RustyDynamics/target/Debug/libRustyDynamics.dylib"));
+//#endif // PLATFORM_WINDOWS
+	RustyDynamicsHandle = GetRustyDynamicsHandle();
+	//RustyDynamicsHandle = !LibraryPath.IsEmpty() ? FPlatformProcess::GetDllHandle(*LibraryPath) : nullptr;
 
 	if (RustyDynamicsHandle)
 	{
@@ -70,6 +71,24 @@ void FDynamicalSystemsModule::ShutdownModule()
 	FPlatformProcess::FreeDllHandle(RustyDynamicsHandle);
 	RustyDynamicsHandle = nullptr;
 }
+
+void* FDynamicalSystemsModule::GetRustyDynamicsHandle()
+{
+	void* NewRustyDynamicsHandle = nullptr;
+
+	FString BinariesPath= FPaths::ProjectDir() / FString(TEXT("Binaries/Win64"));
+	FPlatformProcess::PushDllDirectory(*BinariesPath);
+	NewRustyDynamicsHandle = FPlatformProcess::GetDllHandle(*(BinariesPath / "RustyDynamics.dll"));
+	FPlatformProcess::PopDllDirectory(*BinariesPath);
+
+	if (NewRustyDynamicsHandle != nullptr)
+	{
+		////FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("ThirdPartyLibraryError", "Failed to load example third party library"));
+		UE_LOG(LogTemp, Log, TEXT("DynSys plugin DLL found at %s"), *FPaths::ConvertRelativePathToFull(BinariesPath / "RustyDynamics.dll"));
+	}
+	return NewRustyDynamicsHandle;
+}
+
 
 #undef LOCTEXT_NAMESPACE
 	
