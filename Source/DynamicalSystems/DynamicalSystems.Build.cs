@@ -66,7 +66,17 @@ public class DynamicalSystems : ModuleRules
 			}
 			);
         LoadDynSysLibs(Target);
+        //Lib
+        string PlatformString = Target.Platform.ToString();
+        PublicAdditionalLibraries.Add(Path.Combine(RustyDynamicsPath,"RustyDynamics.dll.lib"));
 
+    }
+    private string RustyDynamicsPath
+    {
+        get
+        {
+                return Path.GetFullPath(Path.Combine(ThirdPartyPath, "RustyDynamics","target","Release"));
+        }
     }
     public void LoadDynSysLibs(ReadOnlyTargetRules Target)
     {
