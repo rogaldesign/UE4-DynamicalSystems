@@ -30,7 +30,7 @@ private:
 		return GetMutableDefault<UDynamicalSystemsSettings>();
 	}
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,BlueprintPure)
 	static UDynamicalSystemsSettings* GetDynamicalSettings() {
 		return Get();
 	}

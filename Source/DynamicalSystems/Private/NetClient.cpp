@@ -6,6 +6,7 @@
 #include "SocketSubsystem.h"
 #include "IPAddress.h"
 #include "Base64.h"
+#include "DynamicalSystemsSettings.h"
 #include "DynamicalSystemsPrivatePCH.h"
 
 DEFINE_LOG_CATEGORY(RustyNet);
@@ -340,3 +341,27 @@ void ANetClient::SendSystemString(int32 System, int32 Id, FString Value)
 	UE_LOG(RustyNet, Warning, TEXT("Msg OUT System String: %u MsgId: %u MsgValue: %s"), Msg[1], Msg[2], *Value);
 	rd_netclient_msg_push(Client, Msg, Len + 3);
 }
+#pragma region BPGetters
+void ANetClient::InitializeWithSettings() {
+	UE_LOG(LogTemp, Warning, TEXT("Initializing Netclient Env: %s"), *UDynamicalSystemsSettings::GetDynamicalSettings()->CurrentEnvironment.ToString());
+	Server = GetServer();
+	AudioDevice = GetAudioDevice();
+	MumbleServer = GetMumbleServer();
+}
+
+FString ANetClient::GetServer() {
+	FString temp = UDynamicalSystemsSettings::GetDynamicalSettings()->GetEnvSetting().Server;
+	UE_LOG(LogTemp, Log, TEXT("Setting Netclient Server to %s"), *temp);
+	return temp;
+}
+FString ANetClient::GetMumbleServer() {
+	FString temp = UDynamicalSystemsSettings::GetDynamicalSettings()->GetEnvSetting().MumbleServer;
+	UE_LOG(LogTemp, Log, TEXT("Setting Netclient Mumble Server to %s"), *temp);
+	return temp;
+}
+FString ANetClient::GetAudioDevice() {
+	FString temp = UDynamicalSystemsSettings::GetDynamicalSettings()->GetEnvSetting().AudioDevice;
+	UE_LOG(LogTemp, Log, TEXT("Setting Netclient Audio Device to %s"), *temp);
+	return temp;
+}
+#pragma endregion BPGetters
