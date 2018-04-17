@@ -8,7 +8,7 @@
 #include <windows.h>
 
 #define LOCTEXT_NAMESPACE "FDynamicalSystemsModule"
-#define DISABLE_VENICE 1
+#define DISABLE_VENICE 0
 extern "C" void ffi_log(const char* log)
 {
 	UE_LOG(LogTemp, Warning, TEXT("[Rust] %s"), UTF8_TO_TCHAR(log));
@@ -17,7 +17,6 @@ extern "C" void ffi_log(const char* log)
 void FDynamicalSystemsModule::StartupModule()
 {
 	auto VenicePlugin = IPluginManager::Get().FindPlugin("Venice");
-#ifndef DISABLE_VENICE
 	if (VenicePlugin.IsValid()) {
 		FString VeniceBaseDir = VenicePlugin->GetBaseDir();
 		const int BufferSize =
@@ -37,7 +36,9 @@ void FDynamicalSystemsModule::StartupModule()
 		FString Path = FString::Join(Paths, TEXT(";"));
 		SetEnvironmentVariable(L"PATH", *Path);
 	}
-#endif
+	else {
+		UE_LOG(LogTemp, Error, TEXT("Venice Plugin Not Valid"));
+	}
 	// Get the base directory of this plugin
 	FString BaseDir = IPluginManager::Get().FindPlugin("DynamicalSystems")->GetBaseDir();
 //
@@ -75,16 +76,22 @@ void FDynamicalSystemsModule::ShutdownModule()
 void* FDynamicalSystemsModule::GetRustyDynamicsHandle()
 {
 	void* NewRustyDynamicsHandle = nullptr;
-
-	FString BinariesPath= FPaths::ProjectDir() / FString(TEXT("Binaries/Win64"));
-	FPlatformProcess::PushDllDirectory(*BinariesPath);
-	NewRustyDynamicsHandle = FPlatformProcess::GetDllHandle(*(BinariesPath / "RustyDynamics.dll"));
-	FPlatformProcess::PopDllDirectory(*BinariesPath);
+	FString BaseDir = IPluginManager::Get().FindPlugin("DynamicalSystems")->GetBaseDir();
+	//FString BinariesPath= FPaths::ProjectDir() / FString(TEXT("Binaries/Win64"));
+	FString BinariesPath = FPaths::Combine(BaseDir,L"Source",L"ThirdParty",L"RustyDynamics",L"target",L"release");
+	FString RustyPath = FPaths::Combine(BinariesPath, L"RustyDynamics.dll");
+	//FPlatformProcess::PushDllDirectory(*BinariesPath);
+	NewRustyDynamicsHandle = FPlatformProcess::GetDllHandle(*RustyPath);
+//	FPlatformProcess::PopDllDirectory(*BinariesPath);
 
 	if (NewRustyDynamicsHandle != nullptr)
 	{
 		////FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("ThirdPartyLibraryError", "Failed to load example third party library"));
-		UE_LOG(LogTemp, Log, TEXT("DynSys plugin DLL found at %s"), *FPaths::ConvertRelativePathToFull(BinariesPath / "RustyDynamics.dll"));
+		UE_LOG(LogTemp, Log, TEXT("DynSys plugin DLL found at %s"), *RustyPath);
+	}
+	else {
+		UE_LOG(LogTemp,Error, TEXT("DynSys plugin DLL NOT found at %s"), *RustyPath);
+
 	}
 	return NewRustyDynamicsHandle;
 }
