@@ -70,16 +70,25 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FUint8MsgDecl OnUint8Msg;
 
+
+	void InitializeWithSettings();
+	UFUNCTION(BlueprintGetter)
+	FString GetServer();
+	UFUNCTION(BlueprintGetter)
+	FString GetMumbleServer();
+	UFUNCTION(BlueprintGetter)
+	FString GetAudioDevice();
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NetClient")
     FString Local;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NetClient")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NetClient", BlueprintGetter = GetServer)
 	FString Server = "127.0.0.1:8080";
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NetClient")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NetClient", BlueprintGetter = GetMumbleServer)
 	FString MumbleServer = "127.0.0.1:8080";
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NetClient")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NetClient", BlueprintGetter = GetAudioDevice)
 	FString AudioDevice = "";
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NetClient")
