@@ -68,7 +68,7 @@ public class DynamicalSystems : ModuleRules
         LoadDynSysLibs(Target);
         //Lib
         string PlatformString = Target.Platform.ToString();
-        PublicAdditionalLibraries.Add(Path.Combine(RustyDynamicsPath,"RustyDynamics.dll.lib"));
+        PublicAdditionalLibraries.Add(Path.Combine(RustyDynamicsPath, "RustyDynamics.dll.lib"));
 
     }
     private string RustyDynamicsPath
@@ -82,7 +82,7 @@ public class DynamicalSystems : ModuleRules
     {
         //RustyDynamics
         string PlatformString = Target.Platform.ToString();
-        AddDependency(Target,Path.Combine(ThirdPartyPath, "RustyDynamics/target/Release/"), "RustyDynamics.dll");
+        AddDependency(Target, RustyDynamicsPath, "RustyDynamics.dll");
         AddDependency(Target, Path.Combine(BinaryFolderPath, PlatformString), "libeay32.dll");
         AddDependency(Target, Path.Combine(BinaryFolderPath, PlatformString), "ovraudio64.dll");
     }
@@ -91,9 +91,9 @@ public class DynamicalSystems : ModuleRules
         string PlatformString = Target.Platform.ToString();
         string PluginDLLPath = Path.Combine(DllPath, DLLName);
         System.Console.WriteLine("Project plugin: "+ DLLName +" detected, using dll at " + PluginDLLPath);
-        CopyToProjectBinaries(PluginDLLPath, Target);
+        //CopyToProjectBinaries(PluginDLLPath, Target);
         string DLLPath = Path.GetFullPath(Path.Combine(GetUProjectPath, "Binaries", PlatformString, DLLName));
-        RuntimeDependencies.Add(DLLPath);
+        RuntimeDependencies.Add(PluginDLLPath);
     }
     private string BinaryFolderPath
     {
