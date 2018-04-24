@@ -10,61 +10,61 @@ public class DynamicalSystems : ModuleRules
     }
 
     public DynamicalSystems(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		
-		PublicIncludePaths.AddRange(
-			new string[] {
-				"DynamicalSystems/Public"
+    {
+        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
+        PublicIncludePaths.AddRange(
+            new string[] {
+                "DynamicalSystems/Public"
 				// ... add public include paths required here ...
 			}
-			);
-				
-		
-		PrivateIncludePaths.AddRange(
-			new string[] {
-				"DynamicalSystems/Private",
+            );
+
+
+        PrivateIncludePaths.AddRange(
+            new string[] {
+                "DynamicalSystems/Private",
 				// ... add other private include paths required here ...
 			}
-			);
-			
-		
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"Core",
+            );
+
+
+        PublicDependencyModuleNames.AddRange(
+            new string[]
+            {
+                "Core",
                 "CoreUObject",
                 "Engine",
                 "PhysX",
                 "APEX",
                 "RustyDynamics",
-				"Projects",
-				"InputCore",
-				"AnimGraphRuntime",
-				"AnimationCore",
+                "Projects",
+                "InputCore",
+                "AnimGraphRuntime",
+                "AnimationCore",
                 "GameplayAbilities",
                 "GameplayTags",
                 "Sockets"
 				// ... add other public dependencies that you statically link with here ...
 			}
-			);
-			
-		
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
+            );
+
+
+        PrivateDependencyModuleNames.AddRange(
+            new string[]
+            {
 
 				// ... add private dependencies that you statically link with here ...
 			}
-			);
-		
-		
-		DynamicallyLoadedModuleNames.AddRange(
-			new string[]
-			{
+            );
+
+
+        DynamicallyLoadedModuleNames.AddRange(
+            new string[]
+            {
 				// ... add any modules that your module loads dynamically here ...
 			}
-			);
+            );
         LoadDynSysLibs(Target);
         //Lib
         string PlatformString = Target.Platform.ToString();
@@ -75,31 +75,38 @@ public class DynamicalSystems : ModuleRules
     {
         get
         {
-                return Path.GetFullPath(Path.Combine(ThirdPartyPath, "RustyDynamics","target","Release"));
+            return Path.GetFullPath(Path.Combine(ThirdPartyPath, "RustyDynamics", "target", "Release"));
         }
     }
     public void LoadDynSysLibs(ReadOnlyTargetRules Target)
     {
         //RustyDynamics
         string PlatformString = Target.Platform.ToString();
-        AddDependency(Target, RustyDynamicsPath, "RustyDynamics.dll");
-        AddDependency(Target, Path.Combine(BinaryFolderPath, PlatformString), "libeay32.dll");
-        AddDependency(Target, Path.Combine(BinaryFolderPath, PlatformString), "ovraudio64.dll");
+        AddDependency(Target, Path.Combine(BinaryFolderPath, PlatformString), "ssleay32.dll", true);
+        AddDependency(Target, Path.Combine(BinaryFolderPath, PlatformString), "libeay32.dll", true);
+        AddDependency(Target, Path.Combine(BinaryFolderPath, PlatformString), "ovraudio64.dll", true);
+        AddDependency(Target, RustyDynamicsPath, "RustyDynamics.dll", false);
     }
-    void AddDependency(ReadOnlyTargetRules Target,string DllPath,string DLLName)
+    void AddDependency(ReadOnlyTargetRules Target, string DllPath, string DLLName, bool DoCopy)
     {
         string PlatformString = Target.Platform.ToString();
         string PluginDLLPath = Path.Combine(DllPath, DLLName);
-        System.Console.WriteLine("Project plugin: "+ DLLName +" detected, using dll at " + PluginDLLPath);
-        //CopyToProjectBinaries(PluginDLLPath, Target);
-        string DLLPath = Path.GetFullPath(Path.Combine(GetUProjectPath, "Binaries", PlatformString, DLLName));
+        if (DoCopy)
+        {
+            CopyToProjectBinaries(PluginDLLPath, Target);
+            PluginDLLPath = Path.GetFullPath(Path.Combine(GetUProjectPath, "Binaries", PlatformString, DLLName));
+
+        }
+        System.Console.WriteLine("Project plugin: " + DLLName + " detected, using dll at " + PluginDLLPath);
+
+
         RuntimeDependencies.Add(PluginDLLPath);
     }
     private string BinaryFolderPath
     {
         get
         {
-            return Path.GetFullPath(Path.Combine(ModulePath, "../../Binaries/")); 
+            return Path.GetFullPath(Path.Combine(ModulePath, "../../Binaries/"));
         }
     }
     private string ThirdPartyPath
