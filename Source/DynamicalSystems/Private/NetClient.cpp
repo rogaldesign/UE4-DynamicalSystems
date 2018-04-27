@@ -14,6 +14,7 @@ DEFINE_LOG_CATEGORY(RustyNet);
 ANetClient::ANetClient()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	InitializeWithSettings();
 }
 
 void ANetClient::RegisterRigidBody(UNetRigidBody* RigidBody)
