@@ -24,7 +24,11 @@ UCLASS(config = "DynamicalSystems", defaultconfig)
 class DYNAMICALSYSTEMS_API UDynamicalSystemsSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
-
+public:
+	UDynamicalSystemsSettings() {
+		this->CurrentSettings = this->GetEnvSetting();
+	}
+	~UDynamicalSystemsSettings() {}
 private:
 	static UDynamicalSystemsSettings* Get() {
 		return GetMutableDefault<UDynamicalSystemsSettings>();
@@ -44,6 +48,10 @@ public:
 
 	UFUNCTION(BlueprintGetter)
 		FNetClientSettings GetEnvSetting() {
+
+		if (!Environments.Contains(CurrentEnvironment)) {
+			return FNetClientSettings();
+		}
 		return  *Environments.Find(CurrentEnvironment);
 	}
 	UPROPERTY(config,VisibleAnywhere, Category = Dynamical, BlueprintGetter = GetEnvSetting)
