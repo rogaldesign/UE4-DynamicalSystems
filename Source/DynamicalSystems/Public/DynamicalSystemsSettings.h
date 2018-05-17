@@ -57,7 +57,8 @@ public:
 	UPROPERTY(config,VisibleAnywhere, Category = Dynamical, BlueprintGetter = GetEnvSetting)
 		FNetClientSettings CurrentSettings;
 
-
+	UPROPERTY(config, EditAnywhere, Category = Dynamical)
+		float PingTimeout = 1.0f;
 #if WITH_EDITOR
 	void PostEditChangeProperty(struct FPropertyChangedEvent& e)
 	{

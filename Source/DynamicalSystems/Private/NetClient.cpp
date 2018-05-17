@@ -66,6 +66,7 @@ void ANetClient::PostInitializeComponents()
 void ANetClient::BeginPlay()
 {
     Super::BeginPlay();
+	InitializeWithSettings();
 
     bool bCanBindAll;
     TSharedPtr<class FInternetAddr> localIp = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->GetLocalHostAddr(*GLog, bCanBindAll);
@@ -140,7 +141,7 @@ void ANetClient::Tick(float DeltaTime)
         }
     }
     
-    if (CurrentTime > LastPingTime + 1) { // Ping
+    if (CurrentTime > (LastPingTime + PingTimeout)) { // Ping
 		uint8 Msg[5];
         Msg[0] = 0;
 		//TODO: byte order
@@ -348,6 +349,7 @@ void ANetClient::InitializeWithSettings() {
 	Server = GetServer();
 	AudioDevice = GetAudioDevice();
 	MumbleServer = GetMumbleServer();
+	PingTimeout = UDynamicalSystemsSettings::GetDynamicalSettings()->PingTimeout;
 }
 
 FString ANetClient::GetServer() {
