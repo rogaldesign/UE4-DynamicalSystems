@@ -126,4 +126,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NetClient|Debug")
 	bool MirrorSyncY = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NetClient|Debug")
+	float PingTimeout = 1.0f;
 };
