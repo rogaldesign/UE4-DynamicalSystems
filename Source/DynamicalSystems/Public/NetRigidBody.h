@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "NetClient.h"
+#include "Runtime/Engine/Classes/Components/ActorComponent.h"
 #include "NetRigidBody.generated.h"
 
 UCLASS( ClassGroup=(DynamicalSystems), meta=(BlueprintSpawnableComponent) )

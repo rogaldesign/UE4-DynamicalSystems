@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Runtime/Engine/Classes/Components/ActorComponent.h"
 #include "SignalGenerator.generated.h"
 
 UENUM(BlueprintType)

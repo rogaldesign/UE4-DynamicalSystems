@@ -5,6 +5,7 @@
 #include <vector>
 #include "CoreMinimal.h"
 #include "NetClient.h"
+#include "Runtime/Engine/Classes/Components/ActorComponent.h"
 #include "NetVoice.generated.h"
 
 
