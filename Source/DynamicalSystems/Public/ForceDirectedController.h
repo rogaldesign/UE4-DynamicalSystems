@@ -4,6 +4,7 @@
 #include "PhysXIncludes.h"
 #include "PhysicsPublic.h"
 #include "Runtime/Engine/Private/PhysicsEngine/PhysXSupport.h"
+#include "Runtime/Engine/Classes/Engine/StaticMeshActor.h"
 #include "ForceDirectedController.generated.h"
 
 

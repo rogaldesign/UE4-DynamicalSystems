@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "NetClient.h"
+#include "Runtime/Engine/Classes/Components/ActorComponent.h"
 #include "NetAvatar.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(NetAvatar, Log, All);
